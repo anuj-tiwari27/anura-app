@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Anura — The Agentic Practice Platform for Indian Litigators</title>
+  <meta name="description" content="Anura is the AI-native practice management platform built for High Court & District Court advocates. Auto-sync e-Courts, never miss a hearing, and let your agent draft, track, and alert — so you can practice law, not chase cause lists." />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+            serif: ['Fraunces', 'ui-serif', 'Georgia', 'serif'],
+            mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
+          },
+          colors: {
+            ink: {
+              DEFAULT: '#0A0E1A',
+              900: '#0A0E1A',
+              800: '#0E1426',
+              700: '#151C32',
+              600: '#1E2843',
+            },
+            paper: {
+              DEFAULT: '#F8F7F3',
+              card: '#FFFFFF',
+              warm: '#F2F0E9',
+            },
+            brand: {
+              50:  '#EEF0FF',
+              100: '#E0E3FF',
+              200: '#C6CCFF',
+              300: '#A3ABFF',
+              400: '#7B82F8',
+              500: '#5B5BE8',
+              600: '#4A41D6',
+              700: '#3E33B4',
+              800: '#332C91',
+              900: '#2C2873',
+            },
+            live: {
+              400: '#34D399',
+              500: '#10B981',
+              600: '#059669',
+            },
+            gold: '#D8A84E',
+          },
+          boxShadow: {
+            'soft': '0 1px 2px rgba(10,14,26,0.04), 0 8px 24px -8px rgba(10,14,26,0.10)',
+            'lift': '0 12px 40px -12px rgba(10,14,26,0.22)',
+            'glow': '0 0 0 1px rgba(91,91,232,0.18), 0 18px 60px -20px rgba(91,91,232,0.55)',
+          },
+        }
+      }
+    }
+  </script>
+
+  <style>
+    html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+    body { background-color: #F8F7F3; }
+
+    .font-serif { font-optical-sizing: auto; }
+
+    /* Animated gradient mesh */
+    .mesh {
+      background:
+        radial-gradient(60% 60% at 15% 10%, rgba(91,91,232,0.28) 0%, transparent 60%),
+        radial-gradient(50% 50% at 85% 0%, rgba(52,211,153,0.18) 0%, transparent 55%),
+        radial-gradient(55% 55% at 70% 90%, rgba(74,65,214,0.22) 0%, transparent 60%);
+    }
+
+    /* Dot grid */
+    .dotgrid {
+      background-image: radial-gradient(rgba(255,255,255,0.07) 1px, transparent 1px);
+      background-size: 22px 22px;
+    }
+    .dotgrid-dark {
+      background-image: radial-gradient(rgba(10,14,26,0.06) 1px, transparent 1px);
+      background-size: 22px 22px;
+    }
+
+    .gradient-text {
+      background: linear-gradient(100deg, #4A41D6 0%, #5B5BE8 40%, #10B981 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    /* Reveal on scroll */
+    .reveal { opacity: 0; transform: translateY(22px); transition: opacity .7s cubic-bezier(.2,.7,.2,1), transform .7s cubic-bezier(.2,.7,.2,1); }
+    .reveal.in { opacity: 1; transform: none; }
+
+    /* Marquee */
+    @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+    .marquee-track { animation: marquee 38s linear infinite; }
+    .marquee-mask { -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+
+    /* Pulse dot */
+    @keyframes pulsering { 0% { box-shadow: 0 0 0 0 rgba(16,185,129,.55); } 70% { box-shadow: 0 0 0 9px rgba(16,185,129,0); } 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); } }
+    .pulse-dot { animation: pulsering 2s infinite; }
+
+    @keyframes blink { 0%,49% { opacity:1 } 50%,100% { opacity:0 } }
+    .caret { animation: blink 1s steps(1) infinite; }
+
+    @keyframes floaty { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-10px) } }
+    .floaty { animation: floaty 6s ease-in-out infinite; }
+    .floaty.slow { animation-duration: 8s; }
+
+    details > summary { list-style: none; cursor: pointer; }
+    details > summary::-webkit-details-marker { display: none; }
+    details[open] .faq-chev { transform: rotate(45deg); }
+
+    .nav-link { position: relative; }
+    .nav-link::after { content:''; position:absolute; left:0; bottom:-4px; height:2px; width:0; background:#4A41D6; transition:width .25s ease; }
+    .nav-link:hover::after { width:100%; }
+
+    ::selection { background: rgba(91,91,232,0.22); }
+  </style>
+</head>
+
+<body class="font-sans text-ink antialiased">
+
+  <!-- ============ ANNOUNCEMENT BAR ============ -->
+  <div class="bg-ink text-white text-[13px]">
+    <div class="max-w-7xl mx-auto px-5 py-2.5 flex items-center justify-center gap-2 text-center">
+      <span class="inline-flex items-center gap-1.5 rounded-full bg-live-500/15 text-live-400 px-2.5 py-0.5 text-[11px] font-semibold tracking-wide uppercase">New</span>
+      <span class="text-white/80">Anura Agent now syncs live with the <strong class="text-white font-semibold">e-Courts</strong> CNR portal &amp; alerts you on <strong class="text-white font-semibold">WhatsApp</strong>.</span>
+      <a href="#demo" class="hidden sm:inline-flex items-center gap-1 text-white font-semibold hover:text-brand-300 transition">Get early access <span aria-hidden="true">→</span></a>
+    </div>
+  </div>
+
+  <!-- ============ NAVBAR ============ -->
+  <header id="nav" class="sticky top-0 z-50 transition-all duration-300">
+    <div class="border-b border-ink/5 bg-paper/80 backdrop-blur-xl">
+      <nav class="max-w-7xl mx-auto px-5 h-[68px] flex items-center justify-between">
+        <!-- Logo -->
+        <a href="#" class="flex items-center gap-2.5 shrink-0">
+          <span class="relative grid place-items-center h-9 w-9 rounded-xl bg-ink text-white shadow-soft overflow-hidden">
+            <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none">
+              <path d="M5 14c0-3.9 3.1-7 7-7s7 3.1 7 7" stroke="#5B5BE8" stroke-width="2" stroke-linecap="round"/>
+              <circle cx="8.5" cy="10.5" r="1.6" fill="#34D399"/>
+              <circle cx="15.5" cy="10.5" r="1.6" fill="#34D399"/>
+              <path d="M6 17.5c1.4 1.4 3.6 2.3 6 2.3s4.6-.9 6-2.3" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="text-[22px] font-bold tracking-tight">Anura</span>
+        </a>
+
+        <!-- Desktop nav -->
+        <div class="hidden lg:flex items-center gap-8 text-[15px] font-medium text-ink/70">
+          <a href="#agentic" class="nav-link hover:text-ink transition">Agentic Mode</a>
+          <a href="#features" class="nav-link hover:text-ink transition">Platform</a>
+          <a href="#briefcase" class="nav-link hover:text-ink transition">Digital Briefcase</a>
+          <a href="#security" class="nav-link hover:text-ink transition">Security</a>
+          <a href="#pricing" class="nav-link hover:text-ink transition">Pricing</a>
+        </div>
+
+        <!-- CTAs -->
+        <div class="flex items-center gap-2 sm:gap-3">
+          <a href="#" class="hidden sm:inline-flex text-[15px] font-semibold text-ink/80 hover:text-ink px-3 py-2 transition">Log in</a>
+          <a href="#demo" class="inline-flex items-center gap-2 rounded-xl bg-ink text-white text-[15px] font-semibold px-4 sm:px-5 py-2.5 shadow-soft hover:bg-ink-700 transition-colors">
+            Book a demo
+          </a>
+          <button id="menuBtn" class="lg:hidden grid place-items-center h-10 w-10 rounded-lg border border-ink/10 text-ink" aria-label="Open menu">
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+      </nav>
+    </div>
+
+    <!-- Mobile menu -->
+    <div id="mobileMenu" class="lg:hidden hidden border-b border-ink/5 bg-paper/95 backdrop-blur-xl">
+      <div class="px-5 py-4 flex flex-col gap-1 text-[16px] font-medium">
+        <a href="#agentic" class="py-2.5 text-ink/80">Agentic Mode</a>
+        <a href="#features" class="py-2.5 text-ink/80">Platform</a>
+        <a href="#briefcase" class="py-2.5 text-ink/80">Digital Briefcase</a>
+        <a href="#security" class="py-2.5 text-ink/80">Security</a>
+        <a href="#pricing" class="py-2.5 text-ink/80">Pricing</a>
+        <a href="#demo" class="mt-2 text-center rounded-xl bg-ink text-white font-semibold py-3">Book a demo</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ HERO ============ -->
+  <section class="relative overflow-hidden bg-ink text-white">
+    <div class="absolute inset-0 mesh opacity-90"></div>
+    <div class="absolute inset-0 dotgrid"></div>
+    <div class="absolute -top-32 -right-32 h-96 w-96 rounded-full bg-brand-500/20 blur-3xl"></div>
+
+    <div class="relative max-w-7xl mx-auto px-5 pt-16 pb-20 lg:pt-24 lg:pb-28 grid lg:grid-cols-2 gap-14 items-center">
+      <!-- Copy -->
+      <div class="max-w-xl">
+        <div class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-[13px] font-medium text-white/85 mb-7">
+          <span class="relative flex h-2 w-2"><span class="pulse-dot absolute inline-flex h-2 w-2 rounded-full bg-live-500"></span></span>
+          Built for Indian High Court &amp; District Court practice
+        </div>
+
+        <h1 class="font-serif text-[42px] leading-[1.05] sm:text-[56px] lg:text-[60px] font-600 tracking-[-0.02em]">
+          Your practice now has an
+          <span class="gradient-text font-700">agent</span> that never misses a date.
+        </h1>
+
+        <p class="mt-6 text-[18px] leading-relaxed text-white/70">
+          Anura is the AI-native practice platform that watches the cause lists for you — syncing
+          <strong class="text-white/90 font-semibold">e-Courts CNR</strong> in real time, drafting your paperwork,
+          and pinging you on WhatsApp the moment an order drops. Less chasing, more lawyering.
+        </p>
+
+        <div class="mt-9 flex flex-col sm:flex-row gap-3">
+          <a href="#demo" class="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-500 hover:bg-brand-400 text-white text-[16px] font-semibold px-6 py-3.5 shadow-glow transition-colors">
+            Book a live demo
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+          <a href="#agentic" class="inline-flex items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/5 hover:bg-white/10 text-white text-[16px] font-semibold px-6 py-3.5 transition-colors">
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            See Agentic Mode
+          </a>
+        </div>
+
+        <!-- Trust row -->
+        <div class="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3 text-[13px] text-white/60">
+          <span class="inline-flex items-center gap-2"><svg class="h-4 w-4 text-live-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.4 8.5-8 10-4.6-1.5-8-5-8-10V6l8-4z" stroke-linejoin="round"/></svg> AES-256 encrypted</span>
+          <span class="inline-flex items-center gap-2"><svg class="h-4 w-4 text-live-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-6 9 6v10a2 2 0 01-2 2H5a2 2 0 01-2-2z" stroke-linejoin="round"/></svg> Hosted in India (Mumbai)</span>
+          <span class="inline-flex items-center gap-2"><svg class="h-4 w-4 text-live-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4M12 3l7 4v5c0 4.5-3 7.6-7 9-4-1.4-7-4.5-7-9V7z" stroke-linejoin="round"/></svg> DPDPA 2023 ready</span>
+        </div>
+      </div>
+
+      <!-- Hero mockup -->
+      <div class="relative">
+        <!-- Floating "next hearing" card -->
+        <div class="floaty absolute -left-3 sm:-left-8 top-6 z-20 w-[210px] rounded-2xl bg-white text-ink p-4 shadow-lift">
+          <div class="flex items-center gap-2 text-[12px] font-semibold text-brand-600">
+            <span class="grid place-items-center h-6 w-6 rounded-lg bg-brand-50"><svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4" stroke-linecap="round"/></svg></span>
+            NEXT HEARING
+          </div>
+          <p class="mt-2 text-[15px] font-bold leading-tight">Mehta v. State of MH</p>
+          <p class="text-[12px] text-ink/50 mt-0.5">Bombay HC · Court 14 · Item 22</p>
+          <div class="mt-3 flex items-center justify-between">
+            <span class="text-[13px] font-bold text-ink">18 Jun 2026</span>
+            <span class="text-[11px] font-semibold rounded-full bg-live-500/10 text-live-600 px-2 py-0.5">Auto-synced</span>
+          </div>
+        </div>
+
+        <!-- Floating WhatsApp alert -->
+        <div class="floaty slow absolute -right-2 sm:-right-6 bottom-2 z-20 w-[230px] rounded-2xl bg-white text-ink p-3.5 shadow-lift">
+          <div class="flex items-center gap-2">
+            <span class="grid place-items-center h-8 w-8 rounded-full bg-[#25D366]/15">
+              <svg class="h-4.5 w-4.5 text-[#1FA855]" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 00-8.6 15l-1.3 4.7 4.8-1.3A10 10 0 1012 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-1.7-.1-.4-.1-.9-.3-1.6-.6-2.8-1.2-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.8 0-1.3.7-2 .9-2.2.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 1.9c.1.2.1.4 0 .5l-.4.5c-.2.2-.3.4-.1.6.2.4.9 1.4 1.9 2 .8.5 1.1.6 1.3.5.2-.1.5-.5.7-.8.2-.2.3-.2.6-.1l1.8.9c.3.1.4.2.5.3 0 .2 0 .8-.2 1.3z"/></svg>
+            </span>
+            <div class="min-w-0">
+              <p class="text-[12px] font-bold">Anura Agent</p>
+              <p class="text-[12px] text-ink/60 leading-snug">⚖️ Order uploaded in <b>Mehta v. State</b>. Reply matter advanced to 18 Jun.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dashboard frame -->
+        <div class="relative rounded-3xl border border-white/10 bg-ink-800/80 backdrop-blur-sm p-2 shadow-2xl">
+          <div class="rounded-[20px] bg-paper overflow-hidden">
+            <!-- top bar -->
+            <div class="flex items-center gap-1.5 px-4 py-3 border-b border-ink/5 bg-white">
+              <span class="h-2.5 w-2.5 rounded-full bg-[#FF5F57]"></span>
+              <span class="h-2.5 w-2.5 rounded-full bg-[#FEBC2E]"></span>
+              <span class="h-2.5 w-2.5 rounded-full bg-[#28C840]"></span>
+              <span class="ml-3 text-[12px] text-ink/40 font-medium">anura.app / cause-list</span>
+              <span class="ml-auto inline-flex items-center gap-1.5 text-[11px] font-semibold text-live-600">
+                <span class="h-1.5 w-1.5 rounded-full bg-live-500"></span> Live e-Courts sync
+              </span>
+            </div>
+            <!-- body -->
+            <div class="p-4 text-ink">
+              <div class="flex items-center justify-between mb-3">
+                <div>
+                  <p class="text-[11px] uppercase tracking-wider text-ink/40 font-semibold">Today's Cause List</p>
+                  <p class="text-[18px] font-bold">Thursday, 12 June</p>
+                </div>
+                <span class="rounded-lg bg-brand-50 text-brand-700 text-[12px] font-bold px-2.5 py-1">7 matters</span>
+              </div>
+
+              <!-- rows -->
+              <div class="space-y-2">
+                <div class="flex items-center gap-3 rounded-xl bg-white border border-ink/5 px-3 py-2.5">
+                  <span class="grid place-items-center h-8 w-8 rounded-lg bg-brand-500 text-white text-[12px] font-bold">14</span>
+                  <div class="min-w-0 flex-1">
+                    <p class="text-[13px] font-semibold truncate">Mehta v. State of Maharashtra</p>
+                    <p class="text-[11px] text-ink/45">Item 22 · Adv. R. Khanna</p>
+                  </div>
+                  <span class="text-[11px] font-semibold rounded-full bg-live-500/10 text-live-600 px-2 py-0.5 shrink-0">Ready</span>
+                </div>
+                <div class="flex items-center gap-3 rounded-xl bg-white border border-ink/5 px-3 py-2.5">
+                  <span class="grid place-items-center h-8 w-8 rounded-lg bg-ink text-white text-[12px] font-bold">07</span>
+                  <div class="min-w-0 flex-1">
+                    <p class="text-[13px] font-semibold truncate">Acme Pvt Ltd v. CIT</p>
+                    <p class="text-[11px] text-ink/45">Item 09 · Adv. S. Iyer</p>
+                  </div>
+                  <span class="text-[11px] font-semibold rounded-full bg-gold/15 text-[#946A1A] px-2 py-0.5 shrink-0">Brief due</span>
+                </div>
+                <div class="flex items-center gap-3 rounded-xl bg-white border border-ink/5 px-3 py-2.5">
+                  <span class="grid place-items-center h-8 w-8 rounded-lg bg-brand-100 text-brand-700 text-[12px] font-bold">22</span>
+                  <div class="min-w-0 flex-1">
+                    <p class="text-[13px] font-semibold truncate">Rao v. Union of India</p>
+                    <p class="text-[11px] text-ink/45">Item 14 · Adv. R. Khanna</p>
+                  </div>
+                  <span class="text-[11px] font-semibold rounded-full bg-ink/5 text-ink/55 px-2 py-0.5 shrink-0">Filed</span>
+                </div>
+              </div>
+
+              <!-- mini agent strip -->
+              <div class="mt-3 rounded-xl bg-ink text-white px-3 py-2.5 flex items-center gap-2.5">
+                <span class="grid place-items-center h-7 w-7 rounded-lg bg-brand-500"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 3v4M5 8l2.5 2.5M19 8l-2.5 2.5" stroke-linecap="round"/><rect x="6" y="9" width="12" height="9" rx="3"/><circle cx="9.5" cy="13.5" r="1" fill="#fff" stroke="none"/><circle cx="14.5" cy="13.5" r="1" fill="#fff" stroke="none"/></svg></span>
+                <p class="text-[12px] text-white/85 flex-1"><b class="text-white">Agent</b> drafted the reply &amp; updated 3 next-dates.</p>
+                <span class="text-[11px] font-semibold text-live-400">Done</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- soft fade to next -->
+    <div class="absolute bottom-0 inset-x-0 h-px bg-white/10"></div>
+  </section>
+
+  <!-- ============ LOGO / SOCIAL PROOF ============ -->
+  <section class="bg-paper border-b border-ink/5">
+    <div class="max-w-7xl mx-auto px-5 py-10">
+      <p class="text-center text-[13px] font-semibold uppercase tracking-[0.16em] text-ink/40">
+        Trusted by chambers &amp; litigation teams practising across
+      </p>
+      <div class="marquee-mask mt-6 overflow-hidden">
+        <div class="marquee-track flex w-max items-center gap-12 text-[15px] font-semibold text-ink/45">
+          <span>Supreme Court of India</span><span class="text-brand-400">•</span>
+          <span>Bombay High Court</span><span class="text-brand-400">•</span>
+          <span>Delhi High Court</span><span class="text-brand-400">•</span>
+          <span>Karnataka High Court</span><span class="text-brand-400">•</span>
+          <span>Madras High Court</span><span class="text-brand-400">•</span>
+          <span>Calcutta High Court</span><span class="text-brand-400">•</span>
+          <span>NCLT &amp; DRT</span><span class="text-brand-400">•</span>
+          <span>District Courts</span><span class="text-brand-400">•</span>
+          <!-- duplicate for seamless loop -->
+          <span>Supreme Court of India</span><span class="text-brand-400">•</span>
+          <span>Bombay High Court</span><span class="text-brand-400">•</span>
+          <span>Delhi High Court</span><span class="text-brand-400">•</span>
+          <span>Karnataka High Court</span><span class="text-brand-400">•</span>
+          <span>Madras High Court</span><span class="text-brand-400">•</span>
+          <span>Calcutta High Court</span><span class="text-brand-400">•</span>
+          <span>NCLT &amp; DRT</span><span class="text-brand-400">•</span>
+          <span>District Courts</span><span class="text-brand-400">•</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PROBLEM ============ -->
+  <section class="bg-paper py-20 lg:py-28">
+    <div class="max-w-7xl mx-auto px-5">
+      <div class="max-w-2xl reveal">
+        <span class="text-[13px] font-bold uppercase tracking-[0.16em] text-brand-600">The daily grind</span>
+        <h2 class="mt-3 font-serif text-[34px] sm:text-[44px] leading-[1.08] font-600 tracking-[-0.02em]">
+          A litigator's day is lost to everything <span class="italic text-brand-600">except</span> the law.
+        </h2>
+        <p class="mt-5 text-[17px] text-ink/60 leading-relaxed">
+          Refreshing the e-Courts portal. Drowning in client WhatsApps. Hunting for the right draft.
+          Praying you didn't miss a date. Anura takes the busywork off your desk.
+        </p>
+      </div>
+
+      <div class="mt-14 grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <!-- Problem cards -->
+        <div class="reveal group rounded-2xl bg-white border border-ink/5 p-6 shadow-soft hover:shadow-lift transition-shadow">
+          <span class="grid place-items-center h-11 w-11 rounded-xl bg-red-50 text-red-500 mb-4">
+            <svg class="h-5.5 w-5.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v5M12 16h.01M10.3 3.9l-8 13.9A2 2 0 004 21h16a2 2 0 001.7-3.2l-8-13.9a2 2 0 00-3.4 0z" stroke-linejoin="round"/></svg>
+          </span>
+          <h3 class="text-[17px] font-bold">Missed hearing dates</h3>
+          <p class="mt-2 text-[14px] text-ink/55 leading-relaxed">One un-refreshed cause list and a matter is dismissed for default. The cost is your reputation.</p>
+        </div>
+        <div class="reveal group rounded-2xl bg-white border border-ink/5 p-6 shadow-soft hover:shadow-lift transition-shadow" style="transition-delay:.05s">
+          <span class="grid place-items-center h-11 w-11 rounded-xl bg-emerald-50 text-emerald-600 mb-4">
+            <svg class="h-5.5 w-5.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.4 8.4 0 01-9 8.4L3 21l1.1-9A8.5 8.5 0 1121 11.5z" stroke-linejoin="round"/></svg>
+          </span>
+          <h3 class="text-[17px] font-bold">WhatsApp chaos</h3>
+          <p class="mt-2 text-[14px] text-ink/55 leading-relaxed">"Any update sir?" — fifty times a day. Clients deserve answers; you deserve your focus back.</p>
+        </div>
+        <div class="reveal group rounded-2xl bg-white border border-ink/5 p-6 shadow-soft hover:shadow-lift transition-shadow" style="transition-delay:.1s">
+          <span class="grid place-items-center h-11 w-11 rounded-xl bg-amber-50 text-amber-600 mb-4">
+            <svg class="h-5.5 w-5.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h6l2 3h8v11a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2z" stroke-linejoin="round"/></svg>
+          </span>
+          <h3 class="text-[17px] font-bold">Document black holes</h3>
+          <p class="mt-2 text-[14px] text-ink/55 leading-relaxed">Which folder has the final vakalatnama? Was it Draft 3 or 4? Search shouldn't be a courtroom risk.</p>
+        </div>
+        <div class="reveal group rounded-2xl bg-white border border-ink/5 p-6 shadow-soft hover:shadow-lift transition-shadow" style="transition-delay:.15s">
+          <span class="grid place-items-center h-11 w-11 rounded-xl bg-brand-50 text-brand-600 mb-4">
+            <svg class="h-5.5 w-5.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 6v6l4 2M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linejoin="round"/></svg>
+          </span>
+          <h3 class="text-[17px] font-bold">Billable hours, lost</h3>
+          <p class="mt-2 text-[14px] text-ink/55 leading-relaxed">Research and drafting time goes unlogged, un-billed, and invisible to the partner reviewing fees.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ AGENTIC MODE (HERO FEATURE) ============ -->
+  <section id="agentic" class="relative overflow-hidden bg-ink text-white py-22 lg:py-28 scroll-mt-20">
+    <div class="absolute inset-0 dotgrid"></div>
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 h-72 w-[700px] bg-brand-500/15 blur-3xl rounded-full"></div>
+
+    <div class="relative max-w-7xl mx-auto px-5 py-8">
+      <div class="max-w-2xl mx-auto text-center reveal">
+        <div class="inline-flex items-center gap-2 rounded-full border border-brand-400/30 bg-brand-500/10 px-3.5 py-1.5 text-[13px] font-semibold text-brand-200 mb-6">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v3M5.5 7l2 2M18.5 7l-2 2" stroke-linecap="round"/><rect x="6" y="8.5" width="12" height="10" rx="3.5"/><circle cx="9.5" cy="13" r="1.1" fill="currentColor" stroke="none"/><circle cx="14.5" cy="13" r="1.1" fill="currentColor" stroke="none"/></svg>
+          Agentic Mode
+        </div>
+        <h2 class="font-serif text-[34px] sm:text-[48px] leading-[1.06] font-600 tracking-[-0.02em]">
+          Not another dashboard.
+          <span class="block gradient-text font-700">A junior that works the file 24×7.</span>
+        </h2>
+        <p class="mt-5 text-[18px] text-white/65 leading-relaxed">
+          Give Anura a goal in plain language. The agent watches the e-Courts portal, updates next-dates,
+          drafts the routine paperwork, assembles your brief, and reports back — only pausing when it needs you.
+        </p>
+      </div>
+
+      <!-- Agent terminal + actions -->
+      <div class="mt-14 grid lg:grid-cols-5 gap-6 items-stretch">
+        <!-- Live agent console -->
+        <div class="lg:col-span-3 reveal">
+          <div class="h-full rounded-3xl border border-white/10 bg-ink-800/70 backdrop-blur shadow-2xl overflow-hidden">
+            <div class="flex items-center gap-2 px-4 py-3 border-b border-white/10">
+              <span class="grid place-items-center h-7 w-7 rounded-lg bg-brand-500"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="6" y="8.5" width="12" height="10" rx="3.5"/><circle cx="9.5" cy="13" r="1.1" fill="#fff" stroke="none"/><circle cx="14.5" cy="13" r="1.1" fill="#fff" stroke="none"/><path d="M12 3v3" stroke-linecap="round"/></svg></span>
+              <p class="text-[13px] font-semibold">Anura Agent</p>
+              <span class="ml-auto inline-flex items-center gap-1.5 text-[11px] font-semibold text-live-400"><span class="h-1.5 w-1.5 rounded-full bg-live-500 pulse-dot"></span> Working</span>
+            </div>
+
+            <div class="p-5 font-mono text-[13px] leading-relaxed">
+              <p class="text-white/45">$ goal:</p>
+              <p class="text-white/90 mb-4">&gt; "Keep all my Bombay HC matters current and prep tomorrow's briefs."</p>
+              <div id="agentLog" class="space-y-2.5"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- What it does -->
+        <div class="lg:col-span-2 reveal grid gap-4" style="transition-delay:.1s">
+          <div class="rounded-2xl border border-white/10 bg-white/5 p-5">
+            <div class="flex items-center gap-3 mb-1.5">
+              <span class="grid place-items-center h-9 w-9 rounded-xl bg-brand-500/20 text-brand-200"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-6.2-8.6M21 4v5h-5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <h3 class="text-[16px] font-bold">Monitors the courts</h3>
+            </div>
+            <p class="text-[14px] text-white/60 leading-relaxed">Polls e-Courts by CNR around the clock. New order, advanced date, fresh listing — it catches it first.</p>
+          </div>
+          <div class="rounded-2xl border border-white/10 bg-white/5 p-5">
+            <div class="flex items-center gap-3 mb-1.5">
+              <span class="grid place-items-center h-9 w-9 rounded-xl bg-live-500/20 text-live-400"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h12l4 4v12a0 0 0 010 0H4z" stroke-linejoin="round"/><path d="M8 13l3 3 5-6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <h3 class="text-[16px] font-bold">Drafts &amp; assembles</h3>
+            </div>
+            <p class="text-[14px] text-white/60 leading-relaxed">Generates routine applications, indexes the paper book, and stages your Digital Briefcase for review.</p>
+          </div>
+          <div class="rounded-2xl border border-white/10 bg-white/5 p-5">
+            <div class="flex items-center gap-3 mb-1.5">
+              <span class="grid place-items-center h-9 w-9 rounded-xl bg-gold/20 text-gold"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M6 6l2 2M16 16l2 2M18 6l-2 2M8 16l-2 2" stroke-linecap="round"/><circle cx="12" cy="12" r="3"/></svg></span>
+              <h3 class="text-[16px] font-bold">Keeps you in control</h3>
+            </div>
+            <p class="text-[14px] text-white/60 leading-relaxed">Every filing-grade action waits for one tap of approval. The agent acts; you decide. Full audit trail.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FEATURES GRID ============ -->
+  <section id="features" class="bg-paper py-20 lg:py-28 scroll-mt-20">
+    <div class="max-w-7xl mx-auto px-5">
+      <div class="max-w-2xl reveal">
+        <span class="text-[13px] font-bold uppercase tracking-[0.16em] text-brand-600">One platform</span>
+        <h2 class="mt-3 font-serif text-[34px] sm:text-[44px] leading-[1.08] font-600 tracking-[-0.02em]">
+          Everything from intake to final judgment.
+        </h2>
+        <p class="mt-5 text-[17px] text-ink/60 leading-relaxed">
+          The full lifecycle of an Indian law practice — managed in one place, and supercharged by the agent.
+        </p>
+      </div>
+
+      <div class="mt-14 grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <!-- e-Courts -->
+        <article class="reveal rounded-2xl bg-white border border-ink/5 p-7 shadow-soft hover:shadow-lift transition-shadow">
+          <span class="grid place-items-center h-12 w-12 rounded-2xl bg-brand-50 text-brand-600 mb-5"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21h18M5 21V10l7-5 7 5v11M9 21v-6h6v6" stroke-linejoin="round"/></svg></span>
+          <h3 class="text-[19px] font-bold">e-Courts &amp; CNR Sync</h3>
+          <p class="mt-2.5 text-[14.5px] text-ink/55 leading-relaxed">Automatic cause-list and next-date updates straight from the e-Courts portal — no manual checking, ever.</p>
+          <ul class="mt-4 space-y-1.5 text-[13.5px] text-ink/65">
+            <li class="flex gap-2"><span class="text-live-500">✓</span> Live CNR tracking</li>
+            <li class="flex gap-2"><span class="text-live-500">✓</span> Daily cause-list generator</li>
+            <li class="flex gap-2"><span class="text-live-500">✓</span> Court &amp; item-number roster</li>
+          </ul>
+        </article>
+
+        <!-- DMS -->
+        <article class="reveal rounded-2xl bg-white border border-ink/5 p-7 shadow-soft hover:shadow-lift transition-shadow" style="transition-delay:.05s">
+          <span class="grid place-items-center h-12 w-12 rounded-2xl bg-emerald-50 text-emerald-600 mb-5"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 3v5h5M14 3H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V8z" stroke-linejoin="round"/><path d="M8 13h8M8 17h5" stroke-linecap="round"/></svg></span>
+          <h3 class="text-[19px] font-bold">Document Management</h3>
+          <p class="mt-2.5 text-[14.5px] text-ink/55 leading-relaxed">Every draft, order, and exhibit — OCR-searchable, version-controlled, and ready for the registry.</p>
+          <ul class="mt-4 space-y-1.5 text-[13.5px] text-ink/65">
+            <li class="flex gap-2"><span class="text-live-500">✓</span> OCR search (even handwriting)</li>
+            <li class="flex gap-2"><span class="text-live-500">✓</span> Version control &amp; Bates stamping</li>
+            <li class="flex gap-2"><span class="text-live-500">✓</span> Aadhaar eSign for vakalatnamas</li>
+          </ul>
+        </article>
+
+        <!-- Client portal -->
+        <article class="reveal rounded-2xl bg-white border border-ink/5 p-7 shadow-soft hover:shadow-lift transition-shadow" style="transition-delay:.1s">
+          <span class="grid place-items-center h-12 w-12 rounded-2xl bg-amber-50 text-amber-600 mb-5"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <h3 class="text-[19px] font-bold">Client Portal</h3>
+          <p class="mt-2.5 text-[14.5px] text-ink/55 leading-relaxed">A secure window into the case timeline — so clients self-serve updates instead of flooding your phone.</p>
+          <ul class="mt-4 space-y-1.5 text-[13.5px] text-ink/65">
+            <li class="flex gap-2"><span class="text-live-500">✓</span> Visual case timeline</li>
+            <li class="flex gap-2"><span class="text-live-500">✓</span> Secure document upload</li>
+            <li class="flex gap-2"><span class="text-live-500">✓</span> WhatsApp status alerts</li>
+          </ul>
+        </article>
+
+        <!-- Staff ops -->
+        <article class="reveal rounded-2xl bg-white border border-ink/5 p-7 shadow-soft hover:shadow-lift transition-shadow">
+          <span class="grid place-items-center h-12 w-12 rounded-2xl bg-brand-50 text-brand-600 mb-5"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/><rect x="4" y="4" width="16" height="16" rx="2"/></svg></span>
+          <h3 class="text-[19px] font-bold">Team &amp; Operations</h3>
+          <p class="mt-2.5 text-[14.5px] text-ink/55 leading-relaxed">Assign drafting to juniors with hard deadlines, track research time, and run a conflict check in seconds.</p>
+          <ul class="mt-4 space-y-1.5 text-[13.5px] text-ink/65">
+            <li class="flex gap-2"><span class="text-live-500">✓</span> Task assignment &amp; deadlines</li>
+            <li class="flex gap-2"><span class="text-live-500">✓</span> Daily activity &amp; time logs</li>
+            <li class="flex gap-2"><span class="text-live-500">✓</span> Conflict-of-interest search</li>
+          </ul>
+        </article>
+
+        <!-- Briefcase -->
+        <article class="reveal rounded-2xl bg-white border border-ink/5 p-7 shadow-soft hover:shadow-lift transition-shadow" style="transition-delay:.05s">
+          <span class="grid place-items-center h-12 w-12 rounded-2xl bg-emerald-50 text-emerald-600 mb-5"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2" stroke-linecap="round"/></svg></span>
+          <h3 class="text-[19px] font-bold">Digital Briefcase</h3>
+          <p class="mt-2.5 text-[14.5px] text-ink/55 leading-relaxed">Your one-page case brief, citations, and cross-examination prop — on your tablet, fully offline.</p>
+          <ul class="mt-4 space-y-1.5 text-[13.5px] text-ink/65">
+            <li class="flex gap-2"><span class="text-live-500">✓</span> Fact summary &amp; statute folder</li>
+            <li class="flex gap-2"><span class="text-live-500">✓</span> Cross-examination drafting</li>
+            <li class="flex gap-2"><span class="text-live-500">✓</span> Works offline in court</li>
+          </ul>
+        </article>
+
+        <!-- Billing -->
+        <article class="reveal rounded-2xl bg-white border border-ink/5 p-7 shadow-soft hover:shadow-lift transition-shadow" style="transition-delay:.1s">
+          <span class="grid place-items-center h-12 w-12 rounded-2xl bg-amber-50 text-amber-600 mb-5"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <h3 class="text-[19px] font-bold">GST Billing</h3>
+          <p class="mt-2.5 text-[14.5px] text-ink/55 leading-relaxed">Invoice the way you bill — hourly, fixed, or per-appearance — with GST-compliant invoices out of the box.</p>
+          <ul class="mt-4 space-y-1.5 text-[13.5px] text-ink/65">
+            <li class="flex gap-2"><span class="text-live-500">✓</span> Hourly / fixed / per-appearance</li>
+            <li class="flex gap-2"><span class="text-live-500">✓</span> GST-compliant invoicing</li>
+            <li class="flex gap-2"><span class="text-live-500">✓</span> Time-log to invoice in one click</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ DIGITAL BRIEFCASE DEEP DIVE ============ -->
+  <section id="briefcase" class="bg-white py-20 lg:py-28 scroll-mt-20 border-y border-ink/5">
+    <div class="max-w-7xl mx-auto px-5 grid lg:grid-cols-2 gap-14 items-center">
+      <div class="reveal">
+        <span class="text-[13px] font-bold uppercase tracking-[0.16em] text-brand-600">Pre-hearing prep</span>
+        <h2 class="mt-3 font-serif text-[32px] sm:text-[42px] leading-[1.1] font-600 tracking-[-0.02em]">
+          Walk into court with the whole file in your hand.
+        </h2>
+        <p class="mt-5 text-[17px] text-ink/60 leading-relaxed">
+          The Digital Briefcase is your competitive edge at the podium: a crisp fact summary, every relevant
+          section and landmark judgment, and your own cross-examination questions — all synced to your tablet
+          and available even when the courtroom has zero signal.
+        </p>
+
+        <div class="mt-8 space-y-4">
+          <div class="flex gap-4">
+            <span class="shrink-0 grid place-items-center h-10 w-10 rounded-xl bg-brand-50 text-brand-600"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4h14v16l-7-3-7 3z" stroke-linejoin="round"/></svg></span>
+            <div><h3 class="text-[16px] font-bold">One-page fact summary</h3><p class="text-[14px] text-ink/55 mt-0.5">The matter at a glance — parties, prayer, posture, and the point you must win.</p></div>
+          </div>
+          <div class="flex gap-4">
+            <span class="shrink-0 grid place-items-center h-10 w-10 rounded-xl bg-emerald-50 text-emerald-600"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" stroke-linejoin="round"/></svg></span>
+            <div><h3 class="text-[16px] font-bold">Statute &amp; citation folder</h3><p class="text-[14px] text-ink/55 mt-0.5">IPC, CrPC, CPC sections and saved PDFs of landmark judgments, one tap away.</p></div>
+          </div>
+          <div class="flex gap-4">
+            <span class="shrink-0 grid place-items-center h-10 w-10 rounded-xl bg-amber-50 text-amber-600"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 10h8M8 14h5M21 12a9 9 0 11-3.6-7.2L21 3v6h-6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <div><h3 class="text-[16px] font-bold">The "Prop" — your cross</h3><p class="text-[14px] text-ink/55 mt-0.5">Draft and refine cross-examination questions and oral-argument points; the agent suggests, you sharpen.</p></div>
+          </div>
+        </div>
+
+        <div class="mt-8 inline-flex items-center gap-2 rounded-full bg-ink text-white text-[13px] font-semibold px-4 py-2">
+          <svg class="h-4 w-4 text-live-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.5l4 4 10-10" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Built for poor-signal courtrooms — full offline mode
+        </div>
+      </div>
+
+      <!-- Tablet mockup -->
+      <div class="reveal" style="transition-delay:.1s">
+        <div class="relative mx-auto max-w-md">
+          <div class="rounded-[28px] border-[10px] border-ink bg-ink p-0 shadow-lift">
+            <div class="rounded-[18px] bg-paper overflow-hidden">
+              <div class="flex items-center justify-between px-5 py-3 bg-white border-b border-ink/5">
+                <p class="text-[13px] font-bold">Digital Briefcase</p>
+                <span class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-ink/50"><svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 8.8a14 14 0 0120 0M5 12.5a9 9 0 0114 0M8.5 16a4 4 0 017 0M12 19.5h.01" stroke-linecap="round"/></svg>Offline</span>
+              </div>
+              <div class="p-5">
+                <p class="text-[11px] uppercase tracking-wider text-brand-600 font-bold">Fact Summary</p>
+                <p class="mt-1.5 text-[15px] font-bold leading-tight">Mehta v. State of Maharashtra</p>
+                <p class="mt-1 text-[12.5px] text-ink/55 leading-relaxed">Bail application u/s 439 CrPC. Accused in custody 47 days; charge-sheet not filed within statutory period. Default bail under 167(2) squarely attracted.</p>
+
+                <div class="mt-4 grid grid-cols-3 gap-2">
+                  <div class="rounded-xl bg-white border border-ink/5 p-2.5 text-center"><p class="text-[16px] font-bold text-brand-600">3</p><p class="text-[10px] text-ink/50 leading-tight">Sections</p></div>
+                  <div class="rounded-xl bg-white border border-ink/5 p-2.5 text-center"><p class="text-[16px] font-bold text-emerald-600">5</p><p class="text-[10px] text-ink/50 leading-tight">Judgments</p></div>
+                  <div class="rounded-xl bg-white border border-ink/5 p-2.5 text-center"><p class="text-[16px] font-bold text-amber-600">8</p><p class="text-[10px] text-ink/50 leading-tight">Cross Qs</p></div>
+                </div>
+
+                <div class="mt-4 rounded-xl bg-ink text-white p-3.5">
+                  <p class="text-[11px] uppercase tracking-wider text-brand-300 font-bold mb-1.5">The Prop · Cross-examination</p>
+                  <p class="text-[12.5px] text-white/85 leading-relaxed">"Officer, can you confirm the exact date the charge-sheet was filed before this Court?"</p>
+                  <div class="mt-2 flex items-center gap-1.5 text-[10.5px] text-live-400 font-semibold"><span class="h-1.5 w-1.5 rounded-full bg-live-500"></span> Drafted with Agent · edited by you</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ WHATSAPP / NOTIFICATIONS STRIP ============ -->
+  <section class="bg-paper py-20 lg:py-24">
+    <div class="max-w-6xl mx-auto px-5">
+      <div class="rounded-3xl bg-ink text-white overflow-hidden shadow-lift">
+        <div class="grid lg:grid-cols-2">
+          <div class="p-9 lg:p-12">
+            <span class="inline-flex items-center gap-2 rounded-full bg-[#25D366]/15 text-[#5CE08A] px-3 py-1 text-[12px] font-bold uppercase tracking-wide">WhatsApp-first</span>
+            <h2 class="mt-5 font-serif text-[30px] sm:text-[38px] leading-[1.1] font-600 tracking-[-0.02em]">
+              The alert that actually reaches a busy lawyer.
+            </h2>
+            <p class="mt-4 text-[16px] text-white/65 leading-relaxed">
+              Email gets buried. In India, a WhatsApp ping does not. The moment a next-date changes or an order
+              is uploaded, Anura messages you — and your client, if you choose — automatically.
+            </p>
+            <ul class="mt-6 space-y-2.5 text-[15px] text-white/80">
+              <li class="flex gap-2.5"><span class="text-live-400">✓</span> Instant next-date &amp; order alerts</li>
+              <li class="flex gap-2.5"><span class="text-live-400">✓</span> Client updates without lifting a finger</li>
+              <li class="flex gap-2.5"><span class="text-live-400">✓</span> Daily cause-list digest every morning</li>
+            </ul>
+          </div>
+          <div class="relative p-9 lg:p-12 bg-ink-800/60 flex items-center justify-center">
+            <div class="absolute inset-0 dotgrid opacity-60"></div>
+            <div class="relative w-full max-w-xs space-y-3">
+              <div class="rounded-2xl rounded-tl-sm bg-white text-ink p-3.5 shadow-lift">
+                <p class="text-[11px] font-bold text-[#1FA855] mb-0.5">Anura Agent</p>
+                <p class="text-[13px] leading-snug">📅 <b>Rao v. Union</b> next date advanced to <b>24 Jun</b> (Court 9, Item 14). Reason to be filed.</p>
+                <p class="text-[10px] text-ink/40 mt-1 text-right">9:02 AM ✓✓</p>
+              </div>
+              <div class="rounded-2xl rounded-tl-sm bg-white text-ink p-3.5 shadow-lift ml-6">
+                <p class="text-[11px] font-bold text-[#1FA855] mb-0.5">Anura Agent</p>
+                <p class="text-[13px] leading-snug">⚖️ Order uploaded in <b>Acme v. CIT</b>. I've saved it &amp; OCR-indexed the PDF.</p>
+                <p class="text-[10px] text-ink/40 mt-1 text-right">9:14 AM ✓✓</p>
+              </div>
+              <div class="rounded-2xl rounded-tl-sm bg-[#DCF8C6] text-ink p-3.5 shadow-lift">
+                <p class="text-[13px] leading-snug">🗂️ Your <b>cause list for tomorrow</b>: 6 matters across Court 9, 14 &amp; 22. Briefs ready.</p>
+                <p class="text-[10px] text-ink/40 mt-1 text-right">9:15 AM ✓✓</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STATS ============ -->
+  <section class="bg-paper pb-20 lg:pb-24">
+    <div class="max-w-7xl mx-auto px-5">
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="reveal rounded-2xl bg-white border border-ink/5 p-7 text-center shadow-soft">
+          <p class="font-serif text-[40px] font-700 text-brand-600" data-count="6" data-suffix="hrs">0</p>
+          <p class="mt-1 text-[14px] text-ink/55">saved per advocate, weekly</p>
+        </div>
+        <div class="reveal rounded-2xl bg-white border border-ink/5 p-7 text-center shadow-soft" style="transition-delay:.05s">
+          <p class="font-serif text-[40px] font-700 text-brand-600" data-count="0" data-suffix="" data-text="Zero">0</p>
+          <p class="mt-1 text-[14px] text-ink/55">missed dates by design</p>
+        </div>
+        <div class="reveal rounded-2xl bg-white border border-ink/5 p-7 text-center shadow-soft" style="transition-delay:.1s">
+          <p class="font-serif text-[40px] font-700 text-brand-600" data-count="24" data-suffix="×7">0</p>
+          <p class="mt-1 text-[14px] text-ink/55">agent watching the courts</p>
+        </div>
+        <div class="reveal rounded-2xl bg-white border border-ink/5 p-7 text-center shadow-soft" style="transition-delay:.15s">
+          <p class="font-serif text-[40px] font-700 text-brand-600" data-count="100" data-suffix="%">0</p>
+          <p class="mt-1 text-[14px] text-ink/55">data resident in India</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SECURITY & COMPLIANCE ============ -->
+  <section id="security" class="relative overflow-hidden bg-ink text-white py-20 lg:py-28 scroll-mt-20">
+    <div class="absolute inset-0 dotgrid"></div>
+    <div class="relative max-w-7xl mx-auto px-5 grid lg:grid-cols-2 gap-14 items-center">
+      <div class="reveal">
+        <span class="text-[13px] font-bold uppercase tracking-[0.16em] text-brand-300">Non-negotiable</span>
+        <h2 class="mt-3 font-serif text-[32px] sm:text-[42px] leading-[1.1] font-600 tracking-[-0.02em]">
+          Privileged data, protected like privilege demands.
+        </h2>
+        <p class="mt-5 text-[17px] text-white/65 leading-relaxed">
+          Your matters carry attorney-client privilege. Anura is engineered for it — encrypted end to end,
+          stored on Indian soil, and compliant with the Digital Personal Data Protection Act, 2023.
+        </p>
+
+        <div class="mt-9 grid sm:grid-cols-2 gap-4">
+          <div class="rounded-2xl border border-white/10 bg-white/5 p-5">
+            <span class="grid place-items-center h-10 w-10 rounded-xl bg-live-500/15 text-live-400 mb-3"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 018 0v3" stroke-linecap="round"/></svg></span>
+            <h3 class="text-[15px] font-bold">AES-256 encryption</h3>
+            <p class="text-[13px] text-white/55 mt-1">End-to-end, at rest and in transit.</p>
+          </div>
+          <div class="rounded-2xl border border-white/10 bg-white/5 p-5">
+            <span class="grid place-items-center h-10 w-10 rounded-xl bg-brand-500/20 text-brand-200 mb-3"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-6 9 6v10a2 2 0 01-2 2H5a2 2 0 01-2-2z" stroke-linejoin="round"/></svg></span>
+            <h3 class="text-[15px] font-bold">Data residency</h3>
+            <p class="text-[13px] text-white/55 mt-1">AWS Mumbai / Azure Central India.</p>
+          </div>
+          <div class="rounded-2xl border border-white/10 bg-white/5 p-5">
+            <span class="grid place-items-center h-10 w-10 rounded-xl bg-gold/20 text-gold mb-3"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.4 8.5-8 10-4.6-1.5-8-5-8-10V6l8-4z" stroke-linejoin="round"/><path d="M9 12l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <h3 class="text-[15px] font-bold">DPDPA 2023 ready</h3>
+            <p class="text-[13px] text-white/55 mt-1">Consent, residency &amp; rights built in.</p>
+          </div>
+          <div class="rounded-2xl border border-white/10 bg-white/5 p-5">
+            <span class="grid place-items-center h-10 w-10 rounded-xl bg-emerald-500/15 text-emerald-300 mb-3"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <h3 class="text-[15px] font-bold">MFA &amp; audit logs</h3>
+            <p class="text-[13px] text-white/55 mt-1">Every access and agent action, traceable.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Security visual -->
+      <div class="reveal" style="transition-delay:.1s">
+        <div class="relative mx-auto max-w-sm rounded-3xl border border-white/10 bg-ink-800/70 p-8 shadow-2xl">
+          <div class="mx-auto grid place-items-center h-24 w-24 rounded-3xl bg-gradient-to-br from-brand-500 to-live-500 shadow-glow">
+            <svg class="h-12 w-12 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2l8 4v6c0 5-3.4 8.5-8 10-4.6-1.5-8-5-8-10V6l8-4z" stroke-linejoin="round"/><path d="M9 12l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <p class="mt-6 text-center text-[15px] font-bold">Privilege-grade security</p>
+          <p class="mt-1 text-center text-[13px] text-white/55">Independently auditable. Indian-resident. Encrypted by default.</p>
+          <div class="mt-6 flex flex-wrap justify-center gap-2">
+            <span class="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-[12px] font-semibold">DPDPA 2023</span>
+            <span class="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-[12px] font-semibold">AES-256</span>
+            <span class="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-[12px] font-semibold">MFA</span>
+            <span class="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-[12px] font-semibold">SOC 2 (in progress)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TESTIMONIALS ============ -->
+  <section class="bg-paper py-20 lg:py-28">
+    <div class="max-w-7xl mx-auto px-5">
+      <div class="max-w-2xl mx-auto text-center reveal">
+        <span class="text-[13px] font-bold uppercase tracking-[0.16em] text-brand-600">From the bar</span>
+        <h2 class="mt-3 font-serif text-[32px] sm:text-[42px] leading-[1.1] font-600 tracking-[-0.02em]">
+          Advocates who got their evenings back.
+        </h2>
+      </div>
+
+      <div class="mt-14 grid md:grid-cols-3 gap-5">
+        <figure class="reveal rounded-2xl bg-white border border-ink/5 p-7 shadow-soft">
+          <div class="flex gap-0.5 text-gold mb-4">★★★★★</div>
+          <blockquote class="text-[15px] text-ink/75 leading-relaxed">"I used to keep a clerk refreshing the e-Courts site all day. Anura's agent does it silently and pings me on WhatsApp. We haven't missed a date since."</blockquote>
+          <figcaption class="mt-5 flex items-center gap-3">
+            <span class="grid place-items-center h-10 w-10 rounded-full bg-brand-100 text-brand-700 font-bold text-[14px]">RK</span>
+            <div><p class="text-[14px] font-bold">Adv. Rohan Khanna</p><p class="text-[12px] text-ink/50">Litigation Chambers, Bombay HC</p></div>
+          </figcaption>
+        </figure>
+        <figure class="reveal rounded-2xl bg-white border border-ink/5 p-7 shadow-soft" style="transition-delay:.05s">
+          <div class="flex gap-0.5 text-gold mb-4">★★★★★</div>
+          <blockquote class="text-[15px] text-ink/75 leading-relaxed">"The Digital Briefcase changed how I argue. The whole file — summary, citations, my cross — on a tablet, offline, in Court 14 where there's no signal."</blockquote>
+          <figcaption class="mt-5 flex items-center gap-3">
+            <span class="grid place-items-center h-10 w-10 rounded-full bg-emerald-100 text-emerald-700 font-bold text-[14px]">SI</span>
+            <div><p class="text-[14px] font-bold">Adv. Sneha Iyer</p><p class="text-[12px] text-ink/50">Tax &amp; Corporate, Delhi HC</p></div>
+          </figcaption>
+        </figure>
+        <figure class="reveal rounded-2xl bg-white border border-ink/5 p-7 shadow-soft" style="transition-delay:.1s">
+          <div class="flex gap-0.5 text-gold mb-4">★★★★★</div>
+          <blockquote class="text-[15px] text-ink/75 leading-relaxed">"As a managing partner, the conflict check and time logs alone justified Anura. Add GST invoicing and agentic drafting — it runs our chambers."</blockquote>
+          <figcaption class="mt-5 flex items-center gap-3">
+            <span class="grid place-items-center h-10 w-10 rounded-full bg-amber-100 text-amber-700 font-bold text-[14px]">VM</span>
+            <div><p class="text-[14px] font-bold">Adv. Vikram Mehta</p><p class="text-[12px] text-ink/50">Managing Partner, Mehta &amp; Co.</p></div>
+          </figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PRICING ============ -->
+  <section id="pricing" class="bg-white py-20 lg:py-28 scroll-mt-20 border-t border-ink/5">
+    <div class="max-w-7xl mx-auto px-5">
+      <div class="max-w-2xl mx-auto text-center reveal">
+        <span class="text-[13px] font-bold uppercase tracking-[0.16em] text-brand-600">Pricing</span>
+        <h2 class="mt-3 font-serif text-[32px] sm:text-[44px] leading-[1.1] font-600 tracking-[-0.02em]">
+          Plans that scale from solo to full chamber.
+        </h2>
+        <p class="mt-4 text-[16px] text-ink/55">Transparent, GST-inclusive. Start free for 14 days — no card, no lock-in.</p>
+      </div>
+
+      <div class="mt-14 grid lg:grid-cols-3 gap-6 items-start">
+        <!-- Solo -->
+        <div class="reveal rounded-3xl border border-ink/10 bg-paper p-8">
+          <h3 class="text-[18px] font-bold">Solo Advocate</h3>
+          <p class="mt-1.5 text-[14px] text-ink/55">For the independent practitioner.</p>
+          <p class="mt-6 flex items-baseline gap-1"><span class="font-serif text-[44px] font-700">₹1,499</span><span class="text-[14px] text-ink/50">/month</span></p>
+          <a href="#demo" class="mt-6 block text-center rounded-xl border border-ink/15 bg-white text-ink font-semibold py-3 hover:bg-ink hover:text-white transition-colors">Start free trial</a>
+          <ul class="mt-7 space-y-3 text-[14px] text-ink/70">
+            <li class="flex gap-2.5"><span class="text-live-500 mt-px">✓</span> Up to 50 active matters</li>
+            <li class="flex gap-2.5"><span class="text-live-500 mt-px">✓</span> e-Courts CNR auto-sync</li>
+            <li class="flex gap-2.5"><span class="text-live-500 mt-px">✓</span> WhatsApp date &amp; order alerts</li>
+            <li class="flex gap-2.5"><span class="text-live-500 mt-px">✓</span> Digital Briefcase (offline)</li>
+            <li class="flex gap-2.5"><span class="text-live-500 mt-px">✓</span> 25 GB document storage</li>
+          </ul>
+        </div>
+
+        <!-- Chambers (featured) -->
+        <div class="reveal relative rounded-3xl border-2 border-brand-500 bg-ink text-white p-8 shadow-glow">
+          <span class="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-brand-500 text-white text-[11px] font-bold uppercase tracking-wide px-3 py-1">Most popular</span>
+          <h3 class="text-[18px] font-bold">Chambers</h3>
+          <p class="mt-1.5 text-[14px] text-white/55">For growing litigation teams.</p>
+          <p class="mt-6 flex items-baseline gap-1"><span class="font-serif text-[44px] font-700">₹4,999</span><span class="text-[14px] text-white/50">/month</span></p>
+          <a href="#demo" class="mt-6 block text-center rounded-xl bg-brand-500 hover:bg-brand-400 text-white font-semibold py-3 transition-colors">Start free trial</a>
+          <ul class="mt-7 space-y-3 text-[14px] text-white/80">
+            <li class="flex gap-2.5"><span class="text-live-400 mt-px">✓</span> <b class="text-white">Everything in Solo, plus:</b></li>
+            <li class="flex gap-2.5"><span class="text-live-400 mt-px">✓</span> Unlimited matters · up to 10 users</li>
+            <li class="flex gap-2.5"><span class="text-live-400 mt-px">✓</span> <b class="text-white">Full Agentic Mode</b> (drafting &amp; prep)</li>
+            <li class="flex gap-2.5"><span class="text-live-400 mt-px">✓</span> Client portal &amp; team task management</li>
+            <li class="flex gap-2.5"><span class="text-live-400 mt-px">✓</span> GST invoicing &amp; conflict check</li>
+            <li class="flex gap-2.5"><span class="text-live-400 mt-px">✓</span> 250 GB storage · OCR &amp; eSign</li>
+          </ul>
+        </div>
+
+        <!-- Firm -->
+        <div class="reveal rounded-3xl border border-ink/10 bg-paper p-8">
+          <h3 class="text-[18px] font-bold">Firm</h3>
+          <p class="mt-1.5 text-[14px] text-ink/55">For established firms &amp; in-house.</p>
+          <p class="mt-6 flex items-baseline gap-1"><span class="font-serif text-[40px] font-700">Custom</span></p>
+          <a href="#demo" class="mt-6 block text-center rounded-xl border border-ink/15 bg-white text-ink font-semibold py-3 hover:bg-ink hover:text-white transition-colors">Talk to sales</a>
+          <ul class="mt-7 space-y-3 text-[14px] text-ink/70">
+            <li class="flex gap-2.5"><span class="text-live-500 mt-px">✓</span> <b>Everything in Chambers, plus:</b></li>
+            <li class="flex gap-2.5"><span class="text-live-500 mt-px">✓</span> Unlimited users &amp; storage</li>
+            <li class="flex gap-2.5"><span class="text-live-500 mt-px">✓</span> SSO, dedicated data residency</li>
+            <li class="flex gap-2.5"><span class="text-live-500 mt-px">✓</span> Custom agent workflows &amp; API</li>
+            <li class="flex gap-2.5"><span class="text-live-500 mt-px">✓</span> Onboarding &amp; priority support</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FAQ ============ -->
+  <section class="bg-paper py-20 lg:py-28">
+    <div class="max-w-3xl mx-auto px-5">
+      <div class="text-center reveal mb-12">
+        <span class="text-[13px] font-bold uppercase tracking-[0.16em] text-brand-600">FAQ</span>
+        <h2 class="mt-3 font-serif text-[32px] sm:text-[42px] leading-[1.1] font-600 tracking-[-0.02em]">Questions, answered.</h2>
+      </div>
+
+      <div class="space-y-3">
+        <details class="reveal group rounded-2xl bg-white border border-ink/5 p-5 shadow-soft" open>
+          <summary class="flex items-center justify-between gap-4 text-[16px] font-bold">
+            How does the e-Courts sync actually work?
+            <span class="faq-chev shrink-0 grid place-items-center h-6 w-6 rounded-lg bg-brand-50 text-brand-600 transition-transform">+</span>
+          </summary>
+          <p class="mt-3 text-[14.5px] text-ink/60 leading-relaxed">Anura tracks each matter by its CNR (Case Number Record) and polls the e-Courts portal continuously via established integrations. When a next-date, order, or listing changes, your dashboard updates and the agent notifies you — no manual checking of cause lists.</p>
+        </details>
+        <details class="reveal group rounded-2xl bg-white border border-ink/5 p-5 shadow-soft">
+          <summary class="flex items-center justify-between gap-4 text-[16px] font-bold">
+            What does "Agentic Mode" do that automation doesn't?
+            <span class="faq-chev shrink-0 grid place-items-center h-6 w-6 rounded-lg bg-brand-50 text-brand-600 transition-transform">+</span>
+          </summary>
+          <p class="mt-3 text-[14.5px] text-ink/60 leading-relaxed">Automation runs fixed rules. The agent works toward a goal you set in plain language — monitoring matters, drafting routine paperwork, assembling briefs, and flagging what needs you. Every filing-grade action requires your one-tap approval, with a full audit trail.</p>
+        </details>
+        <details class="reveal group rounded-2xl bg-white border border-ink/5 p-5 shadow-soft">
+          <summary class="flex items-center justify-between gap-4 text-[16px] font-bold">
+            Is my client data safe and compliant in India?
+            <span class="faq-chev shrink-0 grid place-items-center h-6 w-6 rounded-lg bg-brand-50 text-brand-600 transition-transform">+</span>
+          </summary>
+          <p class="mt-3 text-[14.5px] text-ink/60 leading-relaxed">Yes. All data is AES-256 encrypted end to end and stored on Indian servers (AWS Mumbai / Azure Central India) in line with the DPDPA 2023. Access is protected by multi-factor authentication, and every action — including the agent's — is logged for audit.</p>
+        </details>
+        <details class="reveal group rounded-2xl bg-white border border-ink/5 p-5 shadow-soft">
+          <summary class="flex items-center justify-between gap-4 text-[16px] font-bold">
+            Will the Digital Briefcase work without internet in court?
+            <span class="faq-chev shrink-0 grid place-items-center h-6 w-6 rounded-lg bg-brand-50 text-brand-600 transition-transform">+</span>
+          </summary>
+          <p class="mt-3 text-[14.5px] text-ink/60 leading-relaxed">Absolutely. Briefs sync to your tablet in advance and are fully readable offline — fact summary, statutes, judgments, and your cross-examination notes — built for courtrooms with poor mobile data.</p>
+        </details>
+        <details class="reveal group rounded-2xl bg-white border border-ink/5 p-5 shadow-soft">
+          <summary class="flex items-center justify-between gap-4 text-[16px] font-bold">
+            Can I migrate my existing matters and documents?
+            <span class="faq-chev shrink-0 grid place-items-center h-6 w-6 rounded-lg bg-brand-50 text-brand-600 transition-transform">+</span>
+          </summary>
+          <p class="mt-3 text-[14.5px] text-ink/60 leading-relaxed">Yes. Import matters by CNR in bulk and upload existing documents — OCR makes even scanned and handwritten files searchable. Our team assists with onboarding on Chambers and Firm plans.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FINAL CTA / DEMO ============ -->
+  <section id="demo" class="relative overflow-hidden bg-ink text-white py-20 lg:py-28 scroll-mt-20">
+    <div class="absolute inset-0 mesh opacity-80"></div>
+    <div class="absolute inset-0 dotgrid"></div>
+    <div class="relative max-w-5xl mx-auto px-5">
+      <div class="grid lg:grid-cols-2 gap-12 items-center">
+        <div class="reveal">
+          <h2 class="font-serif text-[34px] sm:text-[46px] leading-[1.06] font-600 tracking-[-0.02em]">
+            Give your practice an <span class="gradient-text font-700">agent</span>.
+          </h2>
+          <p class="mt-5 text-[17px] text-white/70 leading-relaxed">
+            See Anura on your own matters in a 20-minute live demo. We'll wire up a CNR, trigger a real
+            sync, and show the agent prep a brief end to end.
+          </p>
+          <ul class="mt-7 space-y-2.5 text-[15px] text-white/80">
+            <li class="flex gap-2.5"><span class="text-live-400">✓</span> 14-day free trial, no card required</li>
+            <li class="flex gap-2.5"><span class="text-live-400">✓</span> White-glove onboarding &amp; data import</li>
+            <li class="flex gap-2.5"><span class="text-live-400">✓</span> Cancel anytime — your data is yours</li>
+          </ul>
+        </div>
+
+        <!-- Form -->
+        <div class="reveal" style="transition-delay:.08s">
+          <form class="rounded-3xl bg-white text-ink p-7 shadow-2xl" onsubmit="event.preventDefault(); this.querySelector('#formMsg').classList.remove('hidden'); this.reset();">
+            <h3 class="text-[18px] font-bold">Book your live demo</h3>
+            <p class="text-[13px] text-ink/50 mt-1">We'll get back within one working day.</p>
+            <div class="mt-5 space-y-3.5">
+              <div>
+                <label class="text-[12px] font-semibold text-ink/60">Full name</label>
+                <input required type="text" placeholder="Adv. Your Name" class="mt-1 w-full rounded-xl border border-ink/12 bg-paper px-3.5 py-2.5 text-[14px] outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition" />
+              </div>
+              <div>
+                <label class="text-[12px] font-semibold text-ink/60">Work email</label>
+                <input required type="email" placeholder="you@chambers.in" class="mt-1 w-full rounded-xl border border-ink/12 bg-paper px-3.5 py-2.5 text-[14px] outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition" />
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="text-[12px] font-semibold text-ink/60">Practice type</label>
+                  <select class="mt-1 w-full rounded-xl border border-ink/12 bg-paper px-3.5 py-2.5 text-[14px] outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition">
+                    <option>Solo Advocate</option>
+                    <option>Chambers / Team</option>
+                    <option>Law Firm</option>
+                    <option>In-house Legal</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="text-[12px] font-semibold text-ink/60">Primary court</label>
+                  <input type="text" placeholder="e.g. Bombay HC" class="mt-1 w-full rounded-xl border border-ink/12 bg-paper px-3.5 py-2.5 text-[14px] outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition" />
+                </div>
+              </div>
+            </div>
+            <button type="submit" class="mt-5 w-full rounded-xl bg-ink hover:bg-ink-700 text-white font-semibold py-3.5 transition-colors">Request demo</button>
+            <p id="formMsg" class="hidden mt-3 text-center text-[13px] font-semibold text-live-600">✓ Thanks! Our team will reach out shortly.</p>
+            <p class="mt-3 text-center text-[11px] text-ink/40">By submitting you agree to our Terms &amp; Privacy Policy.</p>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="bg-ink-900 text-white/70 border-t border-white/10">
+    <div class="max-w-7xl mx-auto px-5 py-14">
+      <div class="grid md:grid-cols-2 lg:grid-cols-5 gap-10">
+        <div class="lg:col-span-2 max-w-sm">
+          <a href="#" class="flex items-center gap-2.5">
+            <span class="grid place-items-center h-9 w-9 rounded-xl bg-white/5 border border-white/10">
+              <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none">
+                <path d="M5 14c0-3.9 3.1-7 7-7s7 3.1 7 7" stroke="#7B82F8" stroke-width="2" stroke-linecap="round"/>
+                <circle cx="8.5" cy="10.5" r="1.6" fill="#34D399"/><circle cx="15.5" cy="10.5" r="1.6" fill="#34D399"/>
+                <path d="M6 17.5c1.4 1.4 3.6 2.3 6 2.3s4.6-.9 6-2.3" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+            </span>
+            <span class="text-[20px] font-bold text-white">Anura</span>
+          </a>
+          <p class="mt-4 text-[14px] leading-relaxed">The agentic practice platform built for Indian High Court &amp; District Court litigators. Sync the courts, draft the file, never miss a date.</p>
+          <p class="mt-5 text-[13px] text-white/40">Made in India 🇮🇳 · Data resident in India</p>
+        </div>
+
+        <div>
+          <p class="text-[13px] font-bold uppercase tracking-wider text-white/40 mb-4">Platform</p>
+          <ul class="space-y-2.5 text-[14px]">
+            <li><a href="#agentic" class="hover:text-white transition">Agentic Mode</a></li>
+            <li><a href="#features" class="hover:text-white transition">e-Courts Sync</a></li>
+            <li><a href="#features" class="hover:text-white transition">Document Management</a></li>
+            <li><a href="#briefcase" class="hover:text-white transition">Digital Briefcase</a></li>
+            <li><a href="#features" class="hover:text-white transition">GST Billing</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="text-[13px] font-bold uppercase tracking-wider text-white/40 mb-4">Company</p>
+          <ul class="space-y-2.5 text-[14px]">
+            <li><a href="#" class="hover:text-white transition">About</a></li>
+            <li><a href="#" class="hover:text-white transition">Security</a></li>
+            <li><a href="#pricing" class="hover:text-white transition">Pricing</a></li>
+            <li><a href="#" class="hover:text-white transition">Careers</a></li>
+            <li><a href="#demo" class="hover:text-white transition">Contact</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="text-[13px] font-bold uppercase tracking-wider text-white/40 mb-4">Legal</p>
+          <ul class="space-y-2.5 text-[14px]">
+            <li><a href="#" class="hover:text-white transition">Privacy Policy</a></li>
+            <li><a href="#" class="hover:text-white transition">Terms of Service</a></li>
+            <li><a href="#" class="hover:text-white transition">DPDPA Compliance</a></li>
+            <li><a href="#" class="hover:text-white transition">Data Residency</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="mt-12 pt-7 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <p class="text-[13px] text-white/40">© 2026 Anura Technologies Pvt. Ltd. All rights reserved.</p>
+        <div class="flex items-center gap-4 text-white/50">
+          <a href="#" aria-label="LinkedIn" class="hover:text-white transition"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h14zM8.3 18.3v-7H6v7h2.3zM7.1 10.2a1.3 1.3 0 100-2.6 1.3 1.3 0 000 2.6zM18 18.3v-3.8c0-2-.4-3.6-2.8-3.6-1.1 0-1.9.6-2.2 1.2v-1H10.8v7h2.3v-3.5c0-.9.2-1.8 1.3-1.8s1.3 1 1.3 1.9v3.4H18z"/></svg></a>
+          <a href="#" aria-label="X" class="hover:text-white transition"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 3h3l-6.6 7.5L22 21h-6l-4.3-5.6L6.8 21H3.7l7-8L2 3h6.2l3.9 5.2L17.5 3zm-1 16h1.7L7.6 4.8H5.8L16.5 19z"/></svg></a>
+          <a href="#" aria-label="YouTube" class="hover:text-white transition"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M23 12s0-3.4-.4-5a2.6 2.6 0 00-1.8-1.8C19 5 12 5 12 5s-7 0-8.8.4A2.6 2.6 0 001.4 7C1 8.6 1 12 1 12s0 3.4.4 5a2.6 2.6 0 001.8 1.8C5 19 12 19 12 19s7 0 8.8-.4A2.6 2.6 0 0022.6 17c.4-1.6.4-5 .4-5zM10 15.5v-7l6 3.5-6 3.5z"/></svg></a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============ SCRIPTS ============ -->
+  <script>
+    // Mobile menu
+    const menuBtn = document.getElementById('menuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    menuBtn?.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    mobileMenu?.querySelectorAll('a').forEach(a => a.addEventListener('click', () => mobileMenu.classList.add('hidden')));
+
+    // Navbar shadow on scroll
+    const nav = document.getElementById('nav');
+    const onScroll = () => nav.classList.toggle('shadow-soft', window.scrollY > 8);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    // Reveal on scroll
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+    // Count-up stats
+    const countEls = document.querySelectorAll('[data-count]');
+    const countIO = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (!e.isIntersecting) return;
+        const el = e.target;
+        countIO.unobserve(el);
+        if (el.dataset.text) { el.textContent = el.dataset.text; return; }
+        const target = parseInt(el.dataset.count, 10);
+        const suffix = el.dataset.suffix || '';
+        const dur = 1200; const start = performance.now();
+        const tick = (now) => {
+          const p = Math.min((now - start) / dur, 1);
+          const eased = 1 - Math.pow(1 - p, 3);
+          el.textContent = Math.round(target * eased) + suffix;
+          if (p < 1) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      });
+    }, { threshold: 0.6 });
+    countEls.forEach(el => countIO.observe(el));
+
+    // Agent log typing animation
+    const agentLog = document.getElementById('agentLog');
+    if (agentLog) {
+      const steps = [
+        { icon: '🔍', text: 'Scanning e-Courts CNR for 47 active matters…', tone: 'muted' },
+        { icon: '⚡', text: 'Found: next date in Rao v. Union advanced to 24 Jun.', tone: 'brand' },
+        { icon: '✍️', text: 'Drafted reason-to-be-filed application → staged for review.', tone: 'muted' },
+        { icon: '📑', text: 'Assembled Digital Briefcase for 6 listed matters.', tone: 'muted' },
+        { icon: '📲', text: 'Sent WhatsApp alerts to you + 2 clients.', tone: 'live' },
+        { icon: '✅', text: 'Done. 3 items need your approval.', tone: 'live' },
+      ];
+      const toneClass = { muted: 'text-white/65', brand: 'text-brand-300', live: 'text-live-400' };
+      let i = 0;
+      const render = () => {
+        if (i >= steps.length) {
+          // restart loop after a pause
+          setTimeout(() => { agentLog.innerHTML = ''; i = 0; render(); }, 3500);
+          return;
+        }
+        const s = steps[i];
+        const row = document.createElement('div');
+        row.className = 'flex items-start gap-2 opacity-0 transition-opacity duration-500';
+        row.innerHTML = `<span>${s.icon}</span><span class="${toneClass[s.tone]}">${s.text}</span>`;
+        agentLog.appendChild(row);
+        requestAnimationFrame(() => row.classList.remove('opacity-0'));
+        i++;
+        setTimeout(render, 1100);
+      };
+      // start when visible
+      const startIO = new IntersectionObserver((entries) => {
+        entries.forEach(e => { if (e.isIntersecting) { startIO.disconnect(); render(); } });
+      }, { threshold: 0.3 });
+      startIO.observe(agentLog);
+    }
+
+    // Current year (defensive — date provided statically above)
+  </script>
+</body>
+</html>
