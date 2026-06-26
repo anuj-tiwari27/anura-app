@@ -922,22 +922,25 @@
 
         <!-- Form -->
         <div class="reveal" style="transition-delay:.08s">
-          <form class="rounded-3xl bg-white text-ink p-7 shadow-2xl" onsubmit="event.preventDefault(); this.querySelector('#formMsg').classList.remove('hidden'); this.reset();">
+          <form class="rounded-3xl bg-white text-ink p-7 shadow-2xl" onsubmit="event.preventDefault(); submitAnuraForm(this);">
             <h3 class="text-[18px] font-bold">Book your live demo</h3>
             <p class="text-[13px] text-ink/50 mt-1">We'll get back within one working day.</p>
+            <!-- Delivery + recipients handled in assets/forms.js (FormSubmit.co) -->
+            <input type="hidden" name="_subject" value="New demo request from the Anura website" />
+            <input type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true" class="hidden" />
             <div class="mt-5 space-y-3.5">
               <div>
                 <label class="text-[12px] font-semibold text-ink/60">Full name</label>
-                <input required type="text" placeholder="Adv. Your Name" class="mt-1 w-full rounded-xl border border-ink/12 bg-paper px-3.5 py-2.5 text-[14px] outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition" />
+                <input required name="name" type="text" placeholder="Adv. Your Name" class="mt-1 w-full rounded-xl border border-ink/12 bg-paper px-3.5 py-2.5 text-[14px] outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition" />
               </div>
               <div>
                 <label class="text-[12px] font-semibold text-ink/60">Work email</label>
-                <input required type="email" placeholder="you@chambers.in" class="mt-1 w-full rounded-xl border border-ink/12 bg-paper px-3.5 py-2.5 text-[14px] outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition" />
+                <input required name="email" type="email" placeholder="you@chambers.in" class="mt-1 w-full rounded-xl border border-ink/12 bg-paper px-3.5 py-2.5 text-[14px] outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition" />
               </div>
               <div class="grid grid-cols-2 gap-3">
                 <div>
                   <label class="text-[12px] font-semibold text-ink/60">Practice type</label>
-                  <select class="mt-1 w-full rounded-xl border border-ink/12 bg-paper px-3.5 py-2.5 text-[14px] outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition">
+                  <select name="practice_type" class="mt-1 w-full rounded-xl border border-ink/12 bg-paper px-3.5 py-2.5 text-[14px] outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition">
                     <option>Solo Advocate</option>
                     <option>Chambers / Team</option>
                     <option>Law Firm</option>
@@ -946,12 +949,13 @@
                 </div>
                 <div>
                   <label class="text-[12px] font-semibold text-ink/60">Primary court</label>
-                  <input type="text" placeholder="e.g. Bombay HC" class="mt-1 w-full rounded-xl border border-ink/12 bg-paper px-3.5 py-2.5 text-[14px] outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition" />
+                  <input name="primary_court" type="text" placeholder="e.g. Bombay HC" class="mt-1 w-full rounded-xl border border-ink/12 bg-paper px-3.5 py-2.5 text-[14px] outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition" />
                 </div>
               </div>
             </div>
             <button type="submit" class="mt-5 w-full rounded-xl bg-ink hover:bg-ink-700 text-white font-semibold py-3.5 transition-colors">Request demo</button>
-            <p id="formMsg" class="hidden mt-3 text-center text-[13px] font-semibold text-live-600">✓ Thanks! Our team will reach out shortly.</p>
+            <p id="formMsg" data-form-success class="hidden mt-3 text-center text-[13px] font-semibold text-live-600">✓ Thanks! Our team will reach out shortly.</p>
+            <p data-form-error class="hidden mt-3 text-center text-[13px] font-semibold text-red-600">Couldn't send just now - please email sales@anura.app.</p>
             <p class="mt-3 text-center text-[11px] text-ink/40">By submitting you agree to our Terms &amp; Privacy Policy.</p>
           </form>
         </div>
@@ -1012,6 +1016,8 @@
       </div>
     </div>
   </footer>
+
+  <script src="assets/forms.js"></script>
 
   <!-- ============ SCRIPTS ============ -->
   <script>
