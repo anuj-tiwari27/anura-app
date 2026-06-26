@@ -1,5 +1,5 @@
 /* ============================================================
-   Anura — shared theme config, header/footer, and interactions.
+   Anura - shared theme config, header/footer, and interactions.
    Load right AFTER the Tailwind CDN script:
      <script src="https://cdn.tailwindcss.com"></script>
      <script src="assets/theme.js"></script>
@@ -33,20 +33,12 @@ tailwind.config = {
 };
 
 /* ---- Shared markup ---- */
-const ANURA_LOGO_SVG = `
-  <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none">
-    <path d="M5 14c0-3.9 3.1-7 7-7s7 3.1 7 7" stroke="#5B5BE8" stroke-width="2" stroke-linecap="round"/>
-    <circle cx="8.5" cy="10.5" r="1.6" fill="#34D399"/><circle cx="15.5" cy="10.5" r="1.6" fill="#34D399"/>
-    <path d="M6 17.5c1.4 1.4 3.6 2.3 6 2.3s4.6-.9 6-2.3" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>
-  </svg>`;
-
 function siteHeader() {
   return `
   <header id="nav" class="sticky top-0 z-50 transition-all duration-300">
     <div class="border-b border-ink/5 bg-paper/80 backdrop-blur-xl">
       <nav class="max-w-7xl mx-auto px-5 h-[68px] flex items-center justify-between">
         <a href="index.html" class="flex items-center gap-2.5 shrink-0">
-          <span class="grid place-items-center h-9 w-9 rounded-xl bg-ink text-white shadow-soft overflow-hidden">${ANURA_LOGO_SVG}</span>
           <span class="text-[22px] font-bold tracking-tight text-ink">Anura</span>
         </a>
         <div class="hidden lg:flex items-center gap-8 text-[15px] font-medium text-ink/70">
@@ -85,13 +77,6 @@ function siteFooter() {
       <div class="grid md:grid-cols-2 lg:grid-cols-5 gap-10">
         <div class="lg:col-span-2 max-w-sm">
           <a href="index.html" class="flex items-center gap-2.5">
-            <span class="grid place-items-center h-9 w-9 rounded-xl bg-white/5 border border-white/10">
-              <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none">
-                <path d="M5 14c0-3.9 3.1-7 7-7s7 3.1 7 7" stroke="#7B82F8" stroke-width="2" stroke-linecap="round"/>
-                <circle cx="8.5" cy="10.5" r="1.6" fill="#34D399"/><circle cx="15.5" cy="10.5" r="1.6" fill="#34D399"/>
-                <path d="M6 17.5c1.4 1.4 3.6 2.3 6 2.3s4.6-.9 6-2.3" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>
-              </svg>
-            </span>
             <span class="text-[20px] font-bold text-white">Anura</span>
           </a>
           <p class="mt-4 text-[14px] leading-relaxed">The agentic practice platform built for Indian High Court &amp; District Court litigators. Sync the courts, draft the file, never miss a date.</p>
