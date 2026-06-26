@@ -1,0 +1,74 @@
+/* ============================================================
+   Anura — shared site styles (used across all pages)
+   ============================================================ */
+
+html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+body { background-color: #F8F7F3; }
+.font-serif { font-optical-sizing: auto; }
+
+/* Animated gradient mesh */
+.mesh {
+  background:
+    radial-gradient(60% 60% at 15% 10%, rgba(91,91,232,0.28) 0%, transparent 60%),
+    radial-gradient(50% 50% at 85% 0%, rgba(52,211,153,0.18) 0%, transparent 55%),
+    radial-gradient(55% 55% at 70% 90%, rgba(74,65,214,0.22) 0%, transparent 60%);
+}
+
+/* Dot grids */
+.dotgrid { background-image: radial-gradient(rgba(255,255,255,0.07) 1px, transparent 1px); background-size: 22px 22px; }
+.dotgrid-dark { background-image: radial-gradient(rgba(10,14,26,0.06) 1px, transparent 1px); background-size: 22px 22px; }
+
+.gradient-text {
+  background: linear-gradient(100deg, #4A41D6 0%, #5B5BE8 40%, #10B981 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+
+/* Reveal on scroll */
+.reveal { opacity: 0; transform: translateY(22px); transition: opacity .7s cubic-bezier(.2,.7,.2,1), transform .7s cubic-bezier(.2,.7,.2,1); }
+.reveal.in { opacity: 1; transform: none; }
+
+/* Marquee */
+@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.marquee-track { animation: marquee 38s linear infinite; }
+.marquee-mask { -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+
+/* Pulse + caret + floaty */
+@keyframes pulsering { 0% { box-shadow: 0 0 0 0 rgba(16,185,129,.55); } 70% { box-shadow: 0 0 0 9px rgba(16,185,129,0); } 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); } }
+.pulse-dot { animation: pulsering 2s infinite; }
+@keyframes blink { 0%,49% { opacity:1 } 50%,100% { opacity:0 } }
+.caret { animation: blink 1s steps(1) infinite; }
+@keyframes floaty { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-10px) } }
+.floaty { animation: floaty 6s ease-in-out infinite; }
+.floaty.slow { animation-duration: 8s; }
+
+/* FAQ / details */
+details > summary { list-style: none; cursor: pointer; }
+details > summary::-webkit-details-marker { display: none; }
+details[open] .faq-chev { transform: rotate(45deg); }
+
+/* Nav underline */
+.nav-link { position: relative; }
+.nav-link::after { content:''; position:absolute; left:0; bottom:-4px; height:2px; width:0; background:#4A41D6; transition:width .25s ease; }
+.nav-link:hover::after { width:100%; }
+
+::selection { background: rgba(91,91,232,0.22); }
+
+/* ============================================================
+   Long-form content (legal & policy pages)
+   ============================================================ */
+.legal { color: #3a4252; font-size: 15.5px; line-height: 1.75; }
+.legal > *:first-child { margin-top: 0; }
+.legal h2 { color: #0A0E1A; font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 26px; letter-spacing: -0.01em; margin: 2.4em 0 0.6em; }
+.legal h3 { color: #0A0E1A; font-weight: 700; font-size: 17px; margin: 1.8em 0 0.5em; }
+.legal p { margin: 0.9em 0; }
+.legal ul, .legal ol { margin: 0.9em 0; padding-left: 1.3em; }
+.legal li { margin: 0.45em 0; }
+.legal ul li { list-style: none; position: relative; padding-left: 1.1em; }
+.legal ul li::before { content: ''; position: absolute; left: 0; top: 0.65em; width: 6px; height: 6px; border-radius: 9999px; background: #4A41D6; }
+.legal ol { list-style: decimal; }
+.legal a { color: #4A41D6; font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+.legal a:hover { color: #3E33B4; }
+.legal strong { color: #1E2843; font-weight: 700; }
+.legal table { width: 100%; border-collapse: collapse; margin: 1.2em 0; font-size: 14px; }
+.legal th, .legal td { text-align: left; padding: 10px 14px; border: 1px solid rgba(10,14,26,0.10); vertical-align: top; }
+.legal th { background: #F2F0E9; font-weight: 700; color: #1E2843; }

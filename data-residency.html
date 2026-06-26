@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<!-- TEMPLATE: starting draft only. Have qualified counsel review before publishing. Remove the amber notice banner below once finalised. -->
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Data Residency — Anura</title>
+  <meta name="description" content="Where Anura stores and processes your data: Indian regions only (AWS Mumbai / Azure Central India), in line with the DPDPA 2023." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="assets/theme.js"></script>
+  <link rel="stylesheet" href="assets/site.css">
+</head>
+<body class="font-sans text-ink antialiased">
+  <div data-site-header></div>
+
+  <section class="relative overflow-hidden bg-ink text-white">
+    <div class="absolute inset-0 dotgrid"></div>
+    <div class="relative max-w-4xl mx-auto px-5 pt-12 pb-12 lg:pt-16 lg:pb-14">
+      <nav class="text-[13px] text-white/50 mb-5"><a href="index.html" class="hover:text-white">Home</a><span class="mx-1.5">/</span><span class="text-white/80">Data Residency</span></nav>
+      <h1 class="font-serif text-[36px] sm:text-[46px] leading-[1.06] font-600 tracking-[-0.02em]">Data Residency</h1>
+      <p class="mt-3 text-[15px] text-white/55">Last updated: 26 June 2026</p>
+    </div>
+  </section>
+
+  <section class="bg-paper py-14 lg:py-20">
+    <div class="max-w-3xl mx-auto px-5">
+      <!-- REMOVE before publishing -->
+      <div class="mb-8 rounded-xl border border-amber-300 bg-amber-50 text-amber-900 px-4 py-3 text-[13px] leading-relaxed">
+        <strong>Template notice (remove before going live):</strong> Confirm the exact regions, subprocessors, and any cross-border processing against your real infrastructure before publishing.
+      </div>
+
+      <div class="legal">
+        <p class="text-[17px]"><strong>Your data stays in India.</strong> Anura stores and processes customer data exclusively within Indian data-centre regions, consistent with the expectations of the Digital Personal Data Protection Act, 2023 and the preferences of the Indian legal profession.</p>
+
+        <h2>Where your data lives</h2>
+        <ul>
+          <li><strong>Primary hosting:</strong> Indian cloud regions — AWS Asia Pacific (Mumbai) and/or Microsoft Azure Central India.</li>
+          <li><strong>Backups:</strong> encrypted backups are retained within Indian regions only.</li>
+          <li><strong>Processing:</strong> application servers and databases that handle your matters, documents, and account data run in India.</li>
+        </ul>
+
+        <h2>What this covers</h2>
+        <p>Data residency applies to your Customer Data — case and matter details, documents, notes, client records, and account information — as well as encrypted backups of that data.</p>
+
+        <h2>Subprocessors &amp; their locations</h2>
+        <p>We use a small number of vetted subprocessors to operate the Service. Where any subprocessor function could involve processing outside India (for example, certain global communications or analytics providers), we limit it to non-content metadata and apply contractual and technical safeguards. A current subprocessor list, including function and location, is available on request.</p>
+        <table>
+          <thead><tr><th>Function</th><th>Example provider</th><th>Data location</th></tr></thead>
+          <tbody>
+            <tr><td>Cloud hosting &amp; database</td><td>AWS Mumbai / Azure Central India</td><td>India</td></tr>
+            <tr><td>Encrypted backups</td><td>Same Indian region</td><td>India</td></tr>
+            <tr><td>WhatsApp / SMS alerts</td><td>Messaging partner</td><td>India-first; metadata only</td></tr>
+            <tr><td>Payments &amp; GST invoicing</td><td>Indian payment gateway</td><td>India</td></tr>
+          </tbody>
+        </table>
+
+        <h2>Cross-border transfers</h2>
+        <p>We do not transfer your Customer Data outside India for primary storage. Should any limited cross-border processing ever be necessary, we will do so only as permitted by applicable law and with appropriate safeguards, and we will update this page accordingly.</p>
+
+        <h2>Security in transit &amp; at rest</h2>
+        <p>All data is encrypted in transit (TLS 1.2+) and at rest (AES-256). For the full picture, see our <a href="security.html">Security</a> page and <a href="dpdpa.html">DPDPA Compliance</a> overview.</p>
+
+        <h2>Questions?</h2>
+        <p>For data-residency assurances, a subprocessor list, or a Data Processing Addendum, contact <a href="mailto:privacy@anura.app">privacy@anura.app</a>.</p>
+      </div>
+    </div>
+  </section>
+
+  <div data-site-footer></div>
+</body>
+</html>
