@@ -1,0 +1,527 @@
+// Anura data model. Mirrors packages/shared/src/enums.ts — keep enums in sync.
+// pgvector columns (Unsupported("vector(1536)")) are written/read via raw SQL
+// in the AI + Search services; the `vector` extension is created by docker/postgres/init.sql.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --------------------------------------------------------------------------
+// Enums
+// --------------------------------------------------------------------------
+
+enum UserRole {
+  LAWYER
+  ADMIN
+  STAFF
+  CLIENT
+}
+
+enum CourtType {
+  SUPREME_COURT
+  HIGH_COURT
+  DISTRICT_COURT
+  TRIBUNAL
+  CONSUMER_FORUM
+  OTHER
+}
+
+enum PracticeArea {
+  CIVIL
+  CRIMINAL
+  CORPORATE
+  FAMILY
+  PROPERTY
+  TAXATION
+  CONSTITUTIONAL
+  LABOUR
+  INTELLECTUAL_PROPERTY
+  BANKING
+  ARBITRATION
+  OTHER
+}
+
+enum CaseStatus {
+  DRAFT
+  ACTIVE
+  ON_HOLD
+  DISPOSED
+  ARCHIVED
+}
+
+enum CasePartyRole {
+  PETITIONER
+  RESPONDENT
+  PLAINTIFF
+  DEFENDANT
+  APPELLANT
+  APPELLEE
+  COMPLAINANT
+  ACCUSED
+  THIRD_PARTY
+  OTHER
+}
+
+enum TimelineEventType {
+  HEARING
+  FILING
+  ORDER
+  NOTE
+  STATUS_CHANGE
+  DOCUMENT_ADDED
+  REMINDER
+  OTHER
+}
+
+enum DocumentStatus {
+  UPLOADED
+  PROCESSING
+  OCR_DONE
+  INDEXED
+  FAILED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+enum SubscriptionPlan {
+  FREE
+  SOLO
+  TEAM
+  FIRM
+}
+
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+}
+
+enum NotificationType {
+  CASE_UPDATE
+  HEARING_REMINDER
+  DOCUMENT_READY
+  INVOICE
+  SYSTEM
+}
+
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+  WHATSAPP
+  PUSH
+}
+
+enum AIChatRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+enum AIIntent {
+  DRAFTING
+  CASE_SEARCH
+  RESEARCH
+  TIMELINE
+  GENERAL
+}
+
+enum TemplateType {
+  PETITION
+  NOTICE
+  AGREEMENT
+  AFFIDAVIT
+  REPLY
+  OTHER
+}
+
+// --------------------------------------------------------------------------
+// Identity & profile
+// --------------------------------------------------------------------------
+
+model User {
+  id                 String    @id @default(cuid())
+  email              String    @unique
+  passwordHash       String?
+  role               UserRole  @default(LAWYER)
+  fullName           String?
+  avatarUrl          String?
+  phone              String?
+  emailVerified      Boolean   @default(false)
+  onboardingComplete Boolean   @default(false)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  lawyer        Lawyer?
+  caseNotes     CaseNote[]
+  notifications Notification[]
+  aiChats       AIChat[]
+  auditLogs     AuditLog[]
+  refreshTokens RefreshToken[]
+
+  @@index([email])
+}
+
+model RefreshToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model OtpCode {
+  id         String    @id @default(cuid())
+  email      String
+  codeHash   String
+  purpose    String    @default("LOGIN")
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([email])
+}
+
+model Lawyer {
+  id               String         @id @default(cuid())
+  userId           String         @unique
+  fullName         String
+  phone            String?
+  barCouncilId     String?
+  enrollmentYear   Int?
+  experienceYears  Int?
+  practiceAreas    PracticeArea[]
+  courts           String[]
+  primaryCourtType CourtType?
+  city             String?
+  state            String?
+  bio              String?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cases        Case[]
+  documents    Document[]
+  invoices     Invoice[]
+  drafts       Draft[]
+  templates    Template[]
+  subscription Subscription?
+}
+
+// --------------------------------------------------------------------------
+// Cases
+// --------------------------------------------------------------------------
+
+model Case {
+  id              String        @id @default(cuid())
+  lawyerId        String
+  title           String
+  caseNumber      String?
+  cnr             String?
+  court           String?
+  courtType       CourtType?
+  jurisdiction    String?
+  practiceArea    PracticeArea?
+  description     String?
+  status          CaseStatus    @default(DRAFT)
+  clientName      String?
+  filedAt         DateTime?
+  nextHearingDate DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  lawyer   Lawyer         @relation(fields: [lawyerId], references: [id], onDelete: Cascade)
+  parties  CaseParty[]
+  timeline CaseTimeline[]
+  notes    CaseNote[]
+  documents Document[]
+  invoices Invoice[]
+  aiChats  AIChat[]
+  drafts   Draft[]
+
+  @@index([lawyerId])
+  @@index([status])
+  @@index([nextHearingDate])
+}
+
+model CaseParty {
+  id           String        @id @default(cuid())
+  caseId       String
+  name         String
+  role         CasePartyRole
+  contactEmail String?
+  contactPhone String?
+  advocateName String?
+  isClient     Boolean       @default(false)
+  createdAt    DateTime      @default(now())
+
+  case Case @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@index([caseId])
+}
+
+model CaseTimeline {
+  id          String            @id @default(cuid())
+  caseId      String
+  type        TimelineEventType
+  title       String
+  description String?
+  eventDate   DateTime
+  createdAt   DateTime          @default(now())
+
+  case Case @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@index([caseId])
+  @@index([eventDate])
+}
+
+model CaseNote {
+  id        String   @id @default(cuid())
+  caseId    String
+  authorId  String
+  body      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  case   Case @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([caseId])
+}
+
+// --------------------------------------------------------------------------
+// Documents
+// --------------------------------------------------------------------------
+
+model Document {
+  id         String         @id @default(cuid())
+  lawyerId   String
+  caseId     String?
+  filename   String
+  mimeType   String
+  sizeBytes  Int
+  storageKey String
+  status     DocumentStatus @default(UPLOADED)
+  version    Int            @default(1)
+  ocrText    String?
+  checksum   String?
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  lawyer   Lawyer            @relation(fields: [lawyerId], references: [id], onDelete: Cascade)
+  case     Case?             @relation(fields: [caseId], references: [id], onDelete: SetNull)
+  versions DocumentVersion[]
+
+  @@index([lawyerId])
+  @@index([caseId])
+}
+
+model DocumentVersion {
+  id          String   @id @default(cuid())
+  documentId  String
+  version     Int
+  storageKey  String
+  sizeBytes   Int
+  createdById String?
+  createdAt   DateTime @default(now())
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@unique([documentId, version])
+}
+
+// --------------------------------------------------------------------------
+// AI
+// --------------------------------------------------------------------------
+
+model AIChat {
+  id        String    @id @default(cuid())
+  userId    String
+  caseId    String?
+  title     String
+  intent    AIIntent?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  user     User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  case     Case?       @relation(fields: [caseId], references: [id], onDelete: SetNull)
+  messages AIMessage[]
+
+  @@index([userId])
+}
+
+model AIMessage {
+  id        String     @id @default(cuid())
+  chatId    String
+  role      AIChatRole
+  content   String
+  citations Json?
+  tokensIn  Int?
+  tokensOut Int?
+  createdAt DateTime   @default(now())
+
+  chat AIChat @relation(fields: [chatId], references: [id], onDelete: Cascade)
+
+  @@index([chatId])
+}
+
+model Draft {
+  id           String        @id @default(cuid())
+  lawyerId     String
+  caseId       String?
+  title        String
+  content      String
+  templateType TemplateType?
+  citations    Json?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  lawyer Lawyer @relation(fields: [lawyerId], references: [id], onDelete: Cascade)
+  case   Case?  @relation(fields: [caseId], references: [id], onDelete: SetNull)
+
+  @@index([lawyerId])
+}
+
+model Template {
+  id        String       @id @default(cuid())
+  lawyerId  String?
+  name      String
+  type      TemplateType
+  body      String
+  isSystem  Boolean      @default(false)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  lawyer Lawyer? @relation(fields: [lawyerId], references: [id], onDelete: Cascade)
+}
+
+// --------------------------------------------------------------------------
+// Search / embeddings / judgements (pgvector)
+// --------------------------------------------------------------------------
+
+model Embedding {
+  id         String                       @id @default(cuid())
+  ownerType  String // "DOCUMENT" | "CASE"
+  ownerId    String
+  chunkIndex Int                          @default(0)
+  content    String
+  embedding  Unsupported("vector(1536)")?
+  createdAt  DateTime                     @default(now())
+
+  @@index([ownerType, ownerId])
+}
+
+model Judgement {
+  id           String                       @id @default(cuid())
+  title        String
+  court        String?
+  citation     String?
+  practiceArea PracticeArea?
+  decidedAt    DateTime?
+  summary      String?
+  fullText     String?
+  url          String?
+  embedding    Unsupported("vector(1536)")?
+  createdAt    DateTime                     @default(now())
+
+  @@index([practiceArea])
+}
+
+// --------------------------------------------------------------------------
+// Billing
+// --------------------------------------------------------------------------
+
+model Invoice {
+  id          String        @id @default(cuid())
+  lawyerId    String
+  caseId      String?
+  number      String        @unique
+  status      InvoiceStatus @default(DRAFT)
+  currency    String        @default("INR")
+  clientName  String?
+  subtotal    Decimal       @db.Decimal(12, 2)
+  gstPercent  Decimal       @db.Decimal(5, 2)
+  gstAmount   Decimal       @db.Decimal(12, 2)
+  total       Decimal       @db.Decimal(12, 2)
+  items       Json
+  issuedAt    DateTime?
+  dueAt       DateTime?
+  providerRef String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  lawyer Lawyer @relation(fields: [lawyerId], references: [id], onDelete: Cascade)
+  case   Case?  @relation(fields: [caseId], references: [id], onDelete: SetNull)
+
+  @@index([lawyerId])
+}
+
+model Subscription {
+  id               String             @id @default(cuid())
+  lawyerId         String             @unique
+  plan             SubscriptionPlan   @default(FREE)
+  status           SubscriptionStatus @default(TRIALING)
+  seats            Int                @default(1)
+  provider         String?
+  providerSubId    String?
+  currentPeriodEnd DateTime?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  lawyer Lawyer @relation(fields: [lawyerId], references: [id], onDelete: Cascade)
+}
+
+// --------------------------------------------------------------------------
+// Notifications & audit
+// --------------------------------------------------------------------------
+
+model Notification {
+  id        String              @id @default(cuid())
+  userId    String
+  type      NotificationType
+  channel   NotificationChannel @default(IN_APP)
+  title     String
+  body      String?
+  link      String?
+  read      Boolean             @default(false)
+  meta      Json?
+  createdAt DateTime            @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([read])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  action     String
+  entityType String?
+  entityId   String?
+  meta       Json?
+  ip         String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  actor User? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([actorId])
+  @@index([entityType, entityId])
+}

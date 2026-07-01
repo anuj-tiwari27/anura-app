@@ -2,10 +2,17 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "anura-site",
-      "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "4321"],
-      "port": 4321
+      "name": "anura-web",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev:web"],
+      "port": 3400,
+      "autoPort": true
+    },
+    {
+      "name": "anura-api",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev:api"],
+      "port": 4000
     }
   ]
 }

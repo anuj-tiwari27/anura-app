@@ -1,0 +1,35 @@
+{
+  "name": "anura",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Anura - AI-native Practice Management System for Indian litigators",
+  "workspaces": [
+    "packages/*",
+    "apps/api",
+    "apps/web"
+  ],
+  "scripts": {
+    "build:shared": "npm run build -w @anura/shared",
+    "predev": "npm run build:shared",
+    "dev": "concurrently -n api,web -c blue,magenta \"npm:dev:api\" \"npm:dev:web\"",
+    "dev:api": "npm run start:dev -w @anura/api",
+    "dev:web": "npm run dev -w @anura/web",
+    "build": "npm run build:shared && npm run build -w @anura/api && npm run build -w @anura/web",
+    "db:push": "npm run db:push -w @anura/api",
+    "db:generate": "npm run db:generate -w @anura/api",
+    "db:migrate": "npm run db:migrate -w @anura/api",
+    "db:seed": "npm run db:seed -w @anura/api",
+    "db:studio": "npm run db:studio -w @anura/api",
+    "typecheck": "npm run typecheck -w @anura/shared && npm run typecheck -w @anura/api && npm run typecheck -w @anura/web",
+    "lint": "npm run lint -w @anura/api && npm run lint -w @anura/web",
+    "infra:up": "docker compose up -d",
+    "infra:down": "docker compose down",
+    "infra:logs": "docker compose logs -f"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
