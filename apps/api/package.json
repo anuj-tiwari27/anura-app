@@ -4,7 +4,8 @@
   "private": true,
   "description": "Anura API - modular-monolith NestJS backend",
   "scripts": {
-    "build": "nest build",
+    "postinstall": "prisma generate",
+    "build": "prisma generate && nest build",
     "start": "node dist/main.js",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",

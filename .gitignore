@@ -31,9 +31,12 @@ Thumbs.db
 .vscode/*
 !.vscode/extensions.json
 
-# Local uploads (dev filesystem storage provider)
-storage/
-uploads/
+# Local uploads (dev filesystem storage provider) — runtime dirs only, NOT source.
+# Anchored so they don't match apps/api/src/integrations/storage/.
+/storage/
+/uploads/
+/apps/api/storage/
+/apps/api/uploads/
 
 # Coverage
 coverage/
