@@ -22,7 +22,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: '/documents', label: 'Documents', icon: FileText },
   { href: '/assistant', label: 'AI Assistant', icon: Sparkles },
   { href: '/research', label: 'Research', icon: Scale },
-  { href: '/billing', label: 'Billing', icon: Receipt },
+  { href: '/billing', label: 'Invoices', icon: Receipt },
   { href: '/notifications', label: 'Notifications', icon: Bell },
   { href: '/settings', label: 'Settings', icon: Settings },
 ];

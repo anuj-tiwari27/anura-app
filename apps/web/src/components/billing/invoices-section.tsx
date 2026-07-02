@@ -46,11 +46,7 @@ export function InvoicesSection() {
 
   return (
     <section className="space-y-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-lg font-semibold">Invoices</h2>
-          <p className="text-sm text-muted-foreground">Raise GST invoices and track payments.</p>
-        </div>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
         <div className="flex items-center gap-2">
           <div className="w-40">
             <Select

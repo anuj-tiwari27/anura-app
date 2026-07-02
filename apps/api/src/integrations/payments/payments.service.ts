@@ -71,8 +71,9 @@ export class PaymentsService {
           },
         ],
         customer_email: input.customerEmail,
-        success_url: input.successUrl ?? `${this.webOrigin}/billing?status=success`,
-        cancel_url: input.cancelUrl ?? `${this.webOrigin}/billing?status=cancelled`,
+        // Plan management lives under Settings -> Plan & Billing (the /billing page is invoices-only).
+        success_url: input.successUrl ?? `${this.webOrigin}/settings?tab=billing&status=success`,
+        cancel_url: input.cancelUrl ?? `${this.webOrigin}/settings?tab=billing&status=cancelled`,
         metadata: input.metadata,
       });
       return {

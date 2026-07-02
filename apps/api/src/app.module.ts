@@ -20,6 +20,7 @@ import { MessagingModule } from './integrations/messaging/messaging.module';
 import { PaymentsModule } from './integrations/payments/payments.module';
 import { PushModule } from './integrations/push/push.module';
 import { QueueModule } from './integrations/queue/queue.module';
+import { EcourtsModule } from './integrations/ecourts/ecourts.module';
 
 // Feature modules
 import { AuthModule } from './modules/auth/auth.module';
@@ -53,6 +54,7 @@ import { DashboardModule } from './modules/dashboard/dashboard.module';
     PaymentsModule,
     PushModule,
     QueueModule,
+    EcourtsModule,
 
     AuthModule,
     UsersModule,

@@ -12,6 +12,7 @@ import {
 } from '@anura/shared';
 import { api, buildQuery } from '@/lib/api-client';
 import { formatDate } from '@/lib/format';
+import { NewCaseModal } from '@/components/cases/new-case-modal';
 import {
   Button,
   EmptyState,
@@ -35,6 +36,7 @@ export default function CasesPage() {
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('');
   const [page, setPage] = useState(1);
+  const [newCaseOpen, setNewCaseOpen] = useState(false);
 
   const { data, isLoading, isError, isPlaceholderData } = useQuery({
     queryKey: ['cases', { page, search, status }],
@@ -60,12 +62,14 @@ export default function CasesPage() {
         title="Cases"
         description="Every matter you are handling, in one place."
         actions={
-          <Button onClick={() => router.push('/cases/new')}>
+          <Button onClick={() => setNewCaseOpen(true)}>
             <Plus className="h-4 w-4" />
             New case
           </Button>
         }
       />
+
+      <NewCaseModal open={newCaseOpen} onClose={() => setNewCaseOpen(false)} />
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="relative flex-1">
@@ -120,7 +124,7 @@ export default function CasesPage() {
                 Clear filters
               </Button>
             ) : (
-              <Button onClick={() => router.push('/cases/new')}>
+              <Button onClick={() => setNewCaseOpen(true)}>
                 <Plus className="h-4 w-4" />
                 New case
               </Button>

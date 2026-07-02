@@ -146,6 +146,24 @@ export interface CaseDetailView extends CaseSummaryView {
   notes: CaseNoteView[];
 }
 
+/** Case details fetched from the eCourts registry by CNR, mapped to our domain. */
+export interface CnrLookupView {
+  cnr: string;
+  title: string | null;
+  caseNumber: string | null;
+  court: string | null;
+  courtType: CourtType | null;
+  status: CaseStatus | null;
+  statusRaw: string | null;
+  caseTypeRaw: string | null;
+  filedAt: string | null;
+  nextHearingDate: string | null;
+  petitioners: string[];
+  respondents: string[];
+  petitionerAdvocates: string[];
+  respondentAdvocates: string[];
+}
+
 // --- Documents --------------------------------------------------------------
 
 export interface DocumentView {

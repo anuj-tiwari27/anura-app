@@ -69,6 +69,12 @@ export default () => ({
     firebaseClientEmail: process.env.FIREBASE_CLIENT_EMAIL ?? '',
     firebasePrivateKey: (process.env.FIREBASE_PRIVATE_KEY ?? '').replace(/\\n/g, '\n'),
   },
+
+  ecourts: {
+    provider: (process.env.ECOURTS_PROVIDER ?? 'none') as 'none' | 'ecourtsindia',
+    apiUrl: process.env.ECOURTS_API_URL ?? 'https://webapi.ecourtsindia.com',
+    apiToken: process.env.ECOURTS_API_TOKEN ?? '',
+  },
 });
 
 export type AppConfig = ReturnType<typeof import('./configuration').default>;

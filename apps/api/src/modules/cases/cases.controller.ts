@@ -14,11 +14,13 @@ import type {
   CaseNoteView,
   CasePartyView,
   CaseSummaryView,
+  CnrLookupView,
   Paginated,
   TimelineEventView,
 } from '@anura/shared';
 
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { EcourtsService } from '../../integrations/ecourts/ecourts.service';
 import { CasesService } from './cases.service';
 import { CreateCaseDto } from './dto/create-case.dto';
 import { UpdateCaseDto } from './dto/update-case.dto';
@@ -29,7 +31,10 @@ import { CreateNoteDto } from './dto/create-note.dto';
 
 @Controller('cases')
 export class CasesController {
-  constructor(private readonly cases: CasesService) {}
+  constructor(
+    private readonly cases: CasesService,
+    private readonly ecourts: EcourtsService,
+  ) {}
 
   // --- Cases CRUD -----------------------------------------------------------
 
@@ -39,6 +44,12 @@ export class CasesController {
     @Query() query: QueryCasesDto,
   ): Promise<Paginated<CaseSummaryView>> {
     return this.cases.list(lawyerId, query);
+  }
+
+  // Declared before ':id' so 'cnr/...' is not captured as a case id.
+  @Get('cnr/:cnr')
+  lookupCnr(@Param('cnr') cnr: string): Promise<CnrLookupView> {
+    return this.ecourts.fetchCaseByCnr(cnr);
   }
 
   @Post()
