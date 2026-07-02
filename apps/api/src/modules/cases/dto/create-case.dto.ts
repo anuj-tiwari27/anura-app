@@ -1,12 +1,17 @@
 import {
+  ArrayMaxSize,
+  IsArray,
   IsEnum,
   IsISO8601,
   IsOptional,
   IsString,
   MaxLength,
   MinLength,
+  ValidateNested,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 import { CaseStatus, CourtType, PracticeArea } from '@anura/shared';
+import { CreatePartyDto } from './create-party.dto';
 
 export class CreateCaseDto {
   @IsString()
@@ -63,4 +68,12 @@ export class CreateCaseDto {
   @IsOptional()
   @IsEnum(CaseStatus)
   status?: CaseStatus;
+
+  /** Parties to create with the case (used by the eCourts CNR import). */
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(100)
+  @ValidateNested({ each: true })
+  @Type(() => CreatePartyDto)
+  parties?: CreatePartyDto[];
 }

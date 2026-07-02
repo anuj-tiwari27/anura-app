@@ -153,11 +153,17 @@ export interface CnrLookupView {
   caseNumber: string | null;
   court: string | null;
   courtType: CourtType | null;
+  /** District/state the case is registered in, e.g. "Aurangabad, Maharashtra". */
+  jurisdiction: string | null;
+  practiceArea: PracticeArea | null;
   status: CaseStatus | null;
   statusRaw: string | null;
   caseTypeRaw: string | null;
+  /** Human-readable case type from the registry's enum lookup, e.g. "Criminal Complaint Case". */
+  caseTypeLabel: string | null;
   filedAt: string | null;
   nextHearingDate: string | null;
+  decisionDate: string | null;
   petitioners: string[];
   respondents: string[];
   petitionerAdvocates: string[];

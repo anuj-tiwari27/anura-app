@@ -6,7 +6,7 @@ import {
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { CaseStatus, CourtType, type CnrLookupView } from '@anura/shared';
+import { CaseStatus, CourtType, PracticeArea, type CnrLookupView } from '@anura/shared';
 import type { AppConfig } from '../../config/configuration';
 
 /**
@@ -18,10 +18,16 @@ interface EcourtsCaseResponse {
     courtCaseData?: {
       cnr?: string;
       courtName?: string;
+      cnrCourtCode?: string;
+      courtComplexCode?: string;
+      district?: string;
+      state?: string;
       caseNumber?: string;
       caseType?: string;
       caseTypeRaw?: string;
       caseStatus?: string;
+      /** e.g. "Criminal Law/Other Criminal Matters"; string[] on some endpoints. */
+      caseCategoryFacetPath?: string | string[];
       filingNumber?: string;
       filingDate?: string;
       registrationNumber?: string;
@@ -35,6 +41,10 @@ interface EcourtsCaseResponse {
     };
     entityInfo?: {
       nextDateOfHearing?: string;
+    };
+    /** Registry code -> human label lookups (caseType, courtCode, ...). */
+    descriptions?: {
+      enumLookup?: Record<string, Record<string, string>>;
     };
   };
 }
@@ -109,13 +119,14 @@ export class EcourtsService {
     if (!cc) {
       throw new NotFoundException('No case found for this CNR');
     }
-    return this.toView(cnr, cc, body.data?.entityInfo);
+    return this.toView(cnr, cc, body.data?.entityInfo, body.data?.descriptions?.enumLookup);
   }
 
   private toView(
     cnr: string,
     cc: NonNullable<NonNullable<EcourtsCaseResponse['data']>['courtCaseData']>,
     entity?: NonNullable<EcourtsCaseResponse['data']>['entityInfo'],
+    enumLookup?: Record<string, Record<string, string>>,
   ): CnrLookupView {
     const petitioners = (cc.petitioners ?? []).filter(Boolean);
     const respondents = (cc.respondents ?? []).filter(Boolean);
@@ -124,17 +135,40 @@ export class EcourtsService {
         ? `${titleCase(petitioners[0])} v. ${titleCase(respondents[0])}`
         : null;
 
+    // courtName is empty for some registries (e.g. e-Jagriti consumer
+    // commissions); the enum lookup still carries the court label.
+    const courtCode = cc.cnrCourtCode ?? cc.courtComplexCode;
+    const court =
+      cc.courtName ?? (courtCode ? (enumLookup?.courtCode?.[courtCode] ?? null) : null);
+
+    const caseTypeRaw = cc.caseTypeRaw ?? cc.caseType ?? null;
+    const caseTypeLabel =
+      (cc.caseType ? enumLookup?.caseType?.[cc.caseType] : undefined) ?? caseTypeRaw;
+
+    const status = mapStatus(cc.caseStatus);
+    const decisionDate = toIso(cc.decisionDate);
+    // For disposed cases the registry repeats the final hearing under
+    // nextHearingDate; that is history, not an upcoming hearing.
+    const nextHearingDate =
+      status === CaseStatus.DISPOSED
+        ? null
+        : toIso(entity?.nextDateOfHearing ?? cc.nextHearingDate);
+
     return {
       cnr: cc.cnr ?? cnr,
       title,
       caseNumber: cc.registrationNumber ?? cc.filingNumber ?? cc.caseNumber ?? null,
-      court: cc.courtName ?? null,
-      courtType: inferCourtType(cc.courtName),
-      status: mapStatus(cc.caseStatus),
+      court,
+      courtType: inferCourtType(court, cc.caseType),
+      jurisdiction: buildJurisdiction(cc.district, cc.state),
+      practiceArea: inferPracticeArea(cc.caseCategoryFacetPath),
+      status,
       statusRaw: cc.caseStatus ?? null,
-      caseTypeRaw: cc.caseTypeRaw ?? cc.caseType ?? null,
+      caseTypeRaw,
+      caseTypeLabel,
       filedAt: toIso(cc.filingDate ?? cc.registrationDate),
-      nextHearingDate: toIso(entity?.nextDateOfHearing ?? cc.nextHearingDate),
+      nextHearingDate,
+      decisionDate,
       petitioners,
       respondents,
       petitionerAdvocates: (cc.petitionerAdvocates ?? []).filter(Boolean),
@@ -160,17 +194,120 @@ function mapStatus(status: string | undefined): CaseStatus | null {
   }
 }
 
-function inferCourtType(courtName: string | undefined): CourtType | null {
+function inferCourtType(
+  courtName: string | null | undefined,
+  caseType: string | undefined,
+): CourtType | null {
+  // e-Jagriti case types (CC_JAGRITI, FA_JAGRITI, ...) are consumer
+  // commission matters even when the court name is missing.
+  if (caseType?.toUpperCase().includes('JAGRITI')) return CourtType.CONSUMER_FORUM;
   if (!courtName) return null;
   const name = courtName.toLowerCase();
   if (name.includes('supreme court')) return CourtType.SUPREME_COURT;
   if (name.includes('high court')) return CourtType.HIGH_COURT;
-  if (name.includes('tribunal')) return CourtType.TRIBUNAL;
-  if (name.includes('consumer')) return CourtType.CONSUMER_FORUM;
+  if (name.includes('tribunal') || name.includes('nclt') || name.includes('nclat')) {
+    return CourtType.TRIBUNAL;
+  }
+  if (name.includes('consumer') || name.includes('redressal commission')) {
+    return CourtType.CONSUMER_FORUM;
+  }
   if (name.includes('district') || name.includes('magistrate') || name.includes('sessions')) {
     return CourtType.DISTRICT_COURT;
   }
   return CourtType.OTHER;
+}
+
+/** ISO 3166-2:IN codes as returned in courtCaseData.state. */
+const STATE_NAMES: Record<string, string> = {
+  AN: 'Andaman and Nicobar Islands',
+  AP: 'Andhra Pradesh',
+  AR: 'Arunachal Pradesh',
+  AS: 'Assam',
+  BR: 'Bihar',
+  CH: 'Chandigarh',
+  CT: 'Chhattisgarh',
+  CG: 'Chhattisgarh',
+  DD: 'Daman and Diu',
+  DL: 'Delhi',
+  DN: 'Dadra and Nagar Haveli',
+  GA: 'Goa',
+  GJ: 'Gujarat',
+  HP: 'Himachal Pradesh',
+  HR: 'Haryana',
+  JH: 'Jharkhand',
+  JK: 'Jammu and Kashmir',
+  KA: 'Karnataka',
+  KL: 'Kerala',
+  LA: 'Ladakh',
+  LD: 'Lakshadweep',
+  MH: 'Maharashtra',
+  ML: 'Meghalaya',
+  MN: 'Manipur',
+  MP: 'Madhya Pradesh',
+  MZ: 'Mizoram',
+  NL: 'Nagaland',
+  OD: 'Odisha',
+  OR: 'Odisha',
+  PB: 'Punjab',
+  PY: 'Puducherry',
+  RJ: 'Rajasthan',
+  SK: 'Sikkim',
+  TN: 'Tamil Nadu',
+  TR: 'Tripura',
+  TS: 'Telangana',
+  TG: 'Telangana',
+  UK: 'Uttarakhand',
+  UT: 'Uttarakhand',
+  UP: 'Uttar Pradesh',
+  WB: 'West Bengal',
+};
+
+function buildJurisdiction(district: string | undefined, state: string | undefined): string | null {
+  const stateName = state ? (STATE_NAMES[state.toUpperCase()] ?? state) : null;
+  const parts = [district?.trim(), stateName].filter(Boolean) as string[];
+  if (!parts.length) return null;
+  // "New Delhi, Delhi" reads worse than "New Delhi".
+  if (parts.length === 2 && parts[1].toLowerCase().includes(parts[0].toLowerCase())) {
+    return parts[1];
+  }
+  return [...new Set(parts)].join(', ');
+}
+
+/**
+ * Conservative map of the registry's case-category facet (first path
+ * segment, e.g. "Criminal Law/Other Criminal Matters") to our practice
+ * areas. Unknown categories return null so the lawyer picks one.
+ */
+function inferPracticeArea(facetPath: string | string[] | undefined): PracticeArea | null {
+  const first = Array.isArray(facetPath) ? facetPath[0] : facetPath;
+  if (!first) return null;
+  const category = first.split('/')[0]?.toLowerCase() ?? '';
+  if (!category || category.includes('not specified')) return null;
+  if (category.includes('criminal')) return PracticeArea.CRIMINAL;
+  if (category.includes('matrimonial') || category.includes('family')) return PracticeArea.FAMILY;
+  if (category.includes('property') || category.includes('land') || category.includes('rent')) {
+    return PracticeArea.PROPERTY;
+  }
+  if (category.includes('tax')) return PracticeArea.TAXATION;
+  if (category.includes('labour') || category.includes('labor') || category.includes('industrial')) {
+    return PracticeArea.LABOUR;
+  }
+  if (category.includes('constitutional') || category.includes('writ')) {
+    return PracticeArea.CONSTITUTIONAL;
+  }
+  if (category.includes('company') || category.includes('corporate') || category.includes('commercial')) {
+    return PracticeArea.CORPORATE;
+  }
+  if (category.includes('banking') || category.includes('negotiable') || category.includes('recovery')) {
+    return PracticeArea.BANKING;
+  }
+  if (category.includes('arbitration')) return PracticeArea.ARBITRATION;
+  if (category.includes('intellectual') || category.includes('trademark') || category.includes('patent') || category.includes('copyright')) {
+    return PracticeArea.INTELLECTUAL_PROPERTY;
+  }
+  // Consumer disputes are conventionally handled as civil litigation.
+  if (category.includes('civil') || category.includes('consumer')) return PracticeArea.CIVIL;
+  return null;
 }
 
 /** eCourts returns party names in ALL CAPS; make them presentable. */

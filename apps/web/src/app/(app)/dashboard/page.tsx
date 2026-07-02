@@ -1,16 +1,16 @@
 'use client';
 
-import { useEffect } from 'react';
-import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { AlertCircle, Banknote, Briefcase, CalendarClock, FileClock, FilePlus2, RefreshCw } from 'lucide-react';
 import type { DashboardSummary } from '@anura/shared';
-import { Button, buttonVariants, Card, PageHeader } from '@/components/ui';
+import { Button, Card, PageHeader } from '@/components/ui';
 import { api, ApiError } from '@/lib/api-client';
 import { useAuth } from '@/lib/auth-store';
 import { formatCurrency } from '@/lib/format';
 import { DashboardSkeleton } from '@/components/dashboard/dashboard-skeleton';
+import { NewCaseModal } from '@/components/cases/new-case-modal';
 import { QuickActions } from '@/components/dashboard/quick-actions';
 import { RecentCases } from '@/components/dashboard/recent-cases';
 import { StatCard } from '@/components/dashboard/stat-card';
@@ -30,6 +30,7 @@ function firstName(fullName: string | null | undefined): string {
 
 export default function DashboardPage() {
   const user = useAuth((s) => s.user);
+  const [newCaseOpen, setNewCaseOpen] = useState(false);
 
   const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
     queryKey: ['dashboard', 'summary'],
@@ -50,12 +51,14 @@ export default function DashboardPage() {
         title={`${greeting()}, ${firstName(user?.fullName)}`}
         description="Here's what's happening across your practice today."
         actions={
-          <Link href="/cases/new" className={buttonVariants({ size: 'sm' })}>
+          <Button size="sm" onClick={() => setNewCaseOpen(true)}>
             <FilePlus2 className="h-4 w-4" />
             New case
-          </Link>
+          </Button>
         }
       />
+
+      <NewCaseModal open={newCaseOpen} onClose={() => setNewCaseOpen(false)} />
 
       {isLoading ? (
         <DashboardSkeleton />
@@ -113,7 +116,7 @@ export default function DashboardPage() {
           {/* Quick actions */}
           <section>
             <h2 className="mb-3 text-sm font-semibold text-muted-foreground">Quick actions</h2>
-            <QuickActions />
+            <QuickActions onNewCase={() => setNewCaseOpen(true)} />
           </section>
 
           {/* Hearings + recent cases */}
