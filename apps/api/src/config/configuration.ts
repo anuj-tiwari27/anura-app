@@ -4,7 +4,8 @@
  */
 export default () => ({
   env: process.env.NODE_ENV ?? 'development',
-  port: parseInt(process.env.API_PORT ?? '4000', 10),
+  // PORT is the conventional platform-injected variable (Railway, Render, Heroku).
+  port: parseInt(process.env.API_PORT ?? process.env.PORT ?? '4000', 10),
   webOrigin: process.env.WEB_ORIGIN ?? 'http://localhost:3000',
   databaseUrl: process.env.DATABASE_URL ?? '',
   redisUrl: process.env.REDIS_URL ?? 'redis://localhost:6379',
