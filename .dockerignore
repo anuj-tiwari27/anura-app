@@ -4,5 +4,4 @@ node_modules
 **/.next
 .git
 **/.env
-apps/web
 apps/marketing

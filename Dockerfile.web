@@ -1,0 +1,25 @@
+# Anura web (Next.js) image. Build from the repo root:
+#   docker build -f Dockerfile.web -t anura-web .
+# On Railway set the service's Dockerfile Path to `Dockerfile.web`.
+FROM node:20-slim
+
+WORKDIR /app
+
+COPY package.json package-lock.json tsconfig.base.json ./
+COPY packages/shared packages/shared
+COPY apps/web apps/web
+
+RUN npm ci --include-workspace-root --workspace @anura/shared --workspace @anura/web --include=dev
+
+# NEXT_PUBLIC_* vars are baked into the client bundle at build time, so the
+# platform must supply this as a build arg (Railway forwards service variables
+# to Docker builds when an ARG of the same name is declared).
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+
+RUN npm run build:shared && npm run build -w @anura/web
+
+ENV NODE_ENV=production
+EXPOSE 3000
+# next start honors the platform-injected PORT env var.
+CMD ["npm", "run", "start", "-w", "@anura/web"]
