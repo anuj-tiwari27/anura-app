@@ -5,6 +5,7 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { AuthService } from './auth.service';
 import { SignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
+import { GoogleAuthDto } from './dto/google-auth.dto';
 import { RefreshDto } from './dto/refresh.dto';
 import { OtpRequestDto } from './dto/otp-request.dto';
 import { OtpVerifyDto } from './dto/otp-verify.dto';
@@ -24,6 +25,14 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   login(@Body() dto: LoginDto): Promise<AuthResponse> {
     return this.auth.login(dto.email, dto.password);
+  }
+
+  /** Sign in or sign up with a Google Identity Services ID token. */
+  @Public()
+  @Post('google')
+  @HttpCode(HttpStatus.OK)
+  google(@Body() dto: GoogleAuthDto): Promise<AuthResponse> {
+    return this.auth.googleAuth(dto.idToken);
   }
 
   @Public()

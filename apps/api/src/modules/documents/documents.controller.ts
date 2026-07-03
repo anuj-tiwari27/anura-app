@@ -7,6 +7,7 @@ import {
   Param,
   Post,
   Query,
+  StreamableFile,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
@@ -54,6 +55,20 @@ export class DocumentsController {
     @Param('id') id: string,
   ): Promise<{ url: string }> {
     return this.documents.getDownloadUrl(lawyerId, id);
+  }
+
+  /** Stream the file itself through the API — works for every storage provider. */
+  @Get(':id/file')
+  async file(
+    @CurrentUser('lawyerId') lawyerId: string | null,
+    @Param('id') id: string,
+  ): Promise<StreamableFile> {
+    const { doc, body } = await this.documents.downloadFile(lawyerId, id);
+    return new StreamableFile(body, {
+      type: doc.mimeType,
+      disposition: `attachment; filename="${encodeURIComponent(doc.filename)}"`,
+      length: body.byteLength,
+    });
   }
 
   @Delete(':id')

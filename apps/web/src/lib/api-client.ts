@@ -122,6 +122,28 @@ async function upload<T>(path: string, form: FormData, allowRetry = true): Promi
   return (await res.json()) as T;
 }
 
+/** Authenticated binary GET (document downloads). Returns the response Blob. */
+async function blob(path: string, allowRetry = true): Promise<Blob> {
+  const headers: Record<string, string> = {};
+  if (tokenStore.access) headers.Authorization = `Bearer ${tokenStore.access}`;
+
+  const res = await fetch(`${API_BASE}${path}`, { headers });
+  if (res.status === 401 && allowRetry && (await tryRefresh())) {
+    return blob(path, false);
+  }
+  if (!res.ok) {
+    let message = res.statusText;
+    try {
+      const data = (await res.json()) as ApiErrorResponse;
+      message = Array.isArray(data.message) ? data.message.join(', ') : (data.message ?? message);
+    } catch {
+      /* non-JSON error body */
+    }
+    throw new ApiError(message, res.status);
+  }
+  return res.blob();
+}
+
 /** Serialize a params object to a query string (skips empty values). */
 export function buildQuery(params: Record<string, string | number | boolean | undefined | null>): string {
   const q = new URLSearchParams();
@@ -142,5 +164,6 @@ export const api = {
     request<T>(path, { ...opts, method: 'PUT', body }),
   delete: <T>(path: string, opts?: RequestOptions) => request<T>(path, { ...opts, method: 'DELETE' }),
   upload,
+  blob,
   buildQuery,
 };

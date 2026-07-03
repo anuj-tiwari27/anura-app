@@ -10,6 +10,7 @@ import type { AuthResponse } from '@anura/shared';
 import { api, ApiError } from '@/lib/api-client';
 import { useAuth } from '@/lib/auth-store';
 import { Button, Field, Input } from '@/components/ui';
+import { GoogleButton } from '@/components/auth/google-button';
 
 const schema = z.object({
   fullName: z.string().min(2, 'Enter your name'),
@@ -43,7 +44,9 @@ export default function SignupPage() {
       <h1 className="font-display text-2xl font-semibold">Create your account</h1>
       <p className="mt-1 text-sm text-muted-foreground">Start managing cases in minutes.</p>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-4">
+      <GoogleButton context="signup" />
+
+      <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
         <Field label="Full name" htmlFor="fullName" error={errors.fullName?.message}>
           <Input id="fullName" placeholder="Adv. Ananya Rao" autoComplete="name" {...register('fullName')} />
         </Field>

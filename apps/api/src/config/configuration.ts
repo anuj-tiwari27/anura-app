@@ -18,6 +18,11 @@ export default () => ({
     otpTtl: parseInt(process.env.OTP_TTL ?? '300', 10),
   },
 
+  google: {
+    // OAuth client ID used to verify Google Identity Services ID tokens.
+    clientId: process.env.GOOGLE_CLIENT_ID ?? '',
+  },
+
   ai: {
     provider: (process.env.AI_PROVIDER ?? 'anthropic') as 'openai' | 'anthropic',
     openaiApiKey: process.env.OPENAI_API_KEY ?? '',

@@ -10,6 +10,7 @@ import type { AuthResponse } from '@anura/shared';
 import { api, ApiError } from '@/lib/api-client';
 import { useAuth } from '@/lib/auth-store';
 import { Button, Field, Input } from '@/components/ui';
+import { GoogleButton } from '@/components/auth/google-button';
 
 const schema = z.object({
   email: z.string().email('Enter a valid email'),
@@ -42,7 +43,9 @@ export default function LoginPage() {
       <h1 className="font-display text-2xl font-semibold">Sign in to Anura</h1>
       <p className="mt-1 text-sm text-muted-foreground">Manage your practice, cases and drafts.</p>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-4">
+      <GoogleButton context="signin" />
+
+      <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
         <Field label="Email" htmlFor="email" error={errors.email?.message}>
           <Input id="email" type="email" placeholder="you@chambers.in" autoComplete="email" {...register('email')} />
         </Field>

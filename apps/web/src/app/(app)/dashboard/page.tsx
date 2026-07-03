@@ -104,12 +104,12 @@ export default function DashboardPage() {
               href="/documents"
             />
             <StatCard
-              label="Outstanding"
+              label="Unpaid invoices"
               value={formatCurrency(stats?.outstandingInvoiceAmount ?? 0)}
               icon={Banknote}
               tone="destructive"
               href="/billing"
-              hint="Unpaid invoices"
+              hint="Sent & overdue"
             />
           </div>
 

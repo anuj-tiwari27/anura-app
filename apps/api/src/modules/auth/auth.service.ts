@@ -1,6 +1,13 @@
-import { ConflictException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  Logger,
+  ServiceUnavailableException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { OAuth2Client, type TokenPayload } from 'google-auth-library';
 import * as bcrypt from 'bcryptjs';
 import { UserRole } from '@anura/shared';
 import type { AuthResponse, AuthTokens, JwtPayload, PublicUser } from '@anura/shared';
@@ -16,6 +23,7 @@ const OTP_MAX = 900000; // 6-digit codes: 100000..999999
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
+  private googleClient?: OAuth2Client;
 
   constructor(
     private readonly prisma: PrismaService,
@@ -25,6 +33,10 @@ export class AuthService {
 
   private get jwtCfg(): AppConfig['jwt'] {
     return this.config.get<AppConfig['jwt']>('jwt')!;
+  }
+
+  private get googleCfg(): AppConfig['google'] {
+    return this.config.get<AppConfig['google']>('google')!;
   }
 
   // --- Public flows ---------------------------------------------------------
@@ -175,6 +187,56 @@ export class AuthService {
       update: { emailVerified: true },
       create: { email: normalizedEmail, role: UserRole.LAWYER, emailVerified: true },
     });
+
+    const tokens = await this.issueTokens(user);
+    return { user: await this.buildPublicUser(user), tokens };
+  }
+
+  /**
+   * Sign in / sign up with a Google Identity Services ID token.
+   * Verifies the token against GOOGLE_CLIENT_ID, then finds-or-creates the
+   * user by email (same pattern as OTP verify — passwordHash stays null).
+   */
+  async googleAuth(idToken: string): Promise<AuthResponse> {
+    const { clientId } = this.googleCfg;
+    if (!clientId) {
+      throw new ServiceUnavailableException('GOOGLE_CLIENT_ID is not configured');
+    }
+    this.googleClient ??= new OAuth2Client(clientId);
+
+    let payload: TokenPayload | undefined;
+    try {
+      const ticket = await this.googleClient.verifyIdToken({ idToken, audience: clientId });
+      payload = ticket.getPayload();
+    } catch {
+      throw new UnauthorizedException('Invalid Google credential');
+    }
+    if (!payload?.email || !payload.email_verified) {
+      throw new UnauthorizedException('Your Google account has no verified email');
+    }
+
+    const normalizedEmail = payload.email.trim().toLowerCase();
+    const existing = await this.prisma.user.findUnique({ where: { email: normalizedEmail } });
+
+    // Never overwrite a profile the user has already filled in.
+    const user = existing
+      ? await this.prisma.user.update({
+          where: { id: existing.id },
+          data: {
+            emailVerified: true,
+            fullName: existing.fullName ?? payload.name ?? null,
+            avatarUrl: existing.avatarUrl ?? payload.picture ?? null,
+          },
+        })
+      : await this.prisma.user.create({
+          data: {
+            email: normalizedEmail,
+            role: UserRole.LAWYER,
+            emailVerified: true,
+            fullName: payload.name ?? null,
+            avatarUrl: payload.picture ?? null,
+          },
+        });
 
     const tokens = await this.issueTokens(user);
     return { user: await this.buildPublicUser(user), tokens };

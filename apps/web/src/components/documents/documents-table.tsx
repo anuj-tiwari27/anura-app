@@ -57,12 +57,17 @@ export function DocumentsTable({ documents, caseTitles }: DocumentsTableProps) {
   async function handleDownload(doc: DocumentView) {
     setDownloadingId(doc.id);
     try {
-      const { url } = await api.get<{ url: string }>(`/documents/${doc.id}/download`);
-      if (url) {
-        window.open(url, '_blank', 'noopener,noreferrer');
-      } else {
-        toast.error('Download link unavailable');
-      }
+      // Stream the file through the API (works for every storage provider),
+      // then save it locally with the original filename.
+      const data = await api.blob(`/documents/${doc.id}/file`);
+      const url = URL.createObjectURL(data);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = doc.filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : 'Something went wrong');
     } finally {

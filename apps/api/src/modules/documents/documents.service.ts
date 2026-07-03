@@ -80,6 +80,20 @@ export class DocumentsService {
     return { url };
   }
 
+  /**
+   * Fetch the raw file bytes for an owned document. Serving through the API
+   * works for every storage provider (MinIO behind Docker, S3/R2, filesystem)
+   * without needing a browser-reachable storage endpoint.
+   */
+  async downloadFile(
+    lawyerId: string | null | undefined,
+    id: string,
+  ): Promise<{ doc: Document; body: Buffer }> {
+    const doc = await this.getOwned(lawyerId, id);
+    const body = await this.storage.getObject(doc.storageKey);
+    return { doc, body };
+  }
+
   async upload(
     lawyerId: string | null | undefined,
     file: Express.Multer.File | undefined,
