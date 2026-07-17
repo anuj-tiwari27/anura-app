@@ -77,14 +77,8 @@ export class CasesController {
     return this.cases.update(lawyerId, id, dto);
   }
 
-  @Delete(':id')
-  @HttpCode(204)
-  remove(
-    @CurrentUser('lawyerId') lawyerId: string | null,
-    @Param('id') id: string,
-  ): Promise<void> {
-    return this.cases.remove(lawyerId, id);
-  }
+  // Cases are never permanently deleted — a lawyer disposes a case or moves it
+  // back to draft via PATCH { status }. There is deliberately no DELETE route.
 
   // --- Parties --------------------------------------------------------------
 

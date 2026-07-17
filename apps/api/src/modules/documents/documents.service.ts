@@ -3,6 +3,7 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  ServiceUnavailableException,
 } from '@nestjs/common';
 import type { Document, Prisma } from '@prisma/client';
 import type { DocumentView, Paginated } from '@anura/shared';
@@ -16,6 +17,8 @@ import type { QueryDocumentsDto } from './dto/query-documents.dto';
 @Injectable()
 export class DocumentsService {
   private readonly logger = new Logger(DocumentsService.name);
+  /** Grace window (days) an archived document is retained before permanent deletion. */
+  private static readonly ARCHIVE_WINDOW_DAYS = 30;
 
   constructor(
     private readonly prisma: PrismaService,
@@ -43,10 +46,12 @@ export class DocumentsService {
     query: QueryDocumentsDto,
   ): Promise<Paginated<DocumentView>> {
     const owner = this.requireLawyerId(lawyerId);
-    const { page = 1, pageSize = 20, search, caseId } = query;
+    const { page = 1, pageSize = 20, search, caseId, archived } = query;
 
     const where: Prisma.DocumentWhereInput = {
       lawyerId: owner,
+      // Archived docs are hidden from the default list; the Archived view opts in.
+      status: archived ? 'ARCHIVED' : { not: 'ARCHIVED' },
       ...(caseId ? { caseId } : {}),
       ...(search
         ? { filename: { contains: search, mode: 'insensitive' as const } }
@@ -90,8 +95,17 @@ export class DocumentsService {
     id: string,
   ): Promise<{ doc: Document; body: Buffer }> {
     const doc = await this.getOwned(lawyerId, id);
-    const body = await this.storage.getObject(doc.storageKey);
-    return { doc, body };
+    try {
+      const body = await this.storage.getObject(doc.storageKey);
+      return { doc, body };
+    } catch (err) {
+      // Object store unreachable (e.g. MinIO/S3 down or misconfigured) — surface
+      // a clear 503 instead of a generic 500 so the cause is obvious.
+      this.logger.error(`Failed to read object ${doc.storageKey}: ${(err as Error).message}`);
+      throw new ServiceUnavailableException(
+        'Document storage is currently unavailable. Please try again shortly.',
+      );
+    }
   }
 
   async upload(
@@ -139,19 +153,71 @@ export class DocumentsService {
     return this.toView(doc);
   }
 
-  async remove(lawyerId: string | null | undefined, id: string): Promise<void> {
+  /**
+   * Soft-delete: hide the document from the active list and schedule it for
+   * permanent deletion after a 30-day grace window (see DocumentsPurgeService).
+   * The file is NOT removed from storage yet, so it can be restored.
+   */
+  async archive(lawyerId: string | null | undefined, id: string): Promise<DocumentView> {
     const doc = await this.getOwned(lawyerId, id);
+    if (doc.status === 'ARCHIVED') return this.toView(doc);
 
-    // Best-effort storage cleanup; still remove the row if the object is gone.
-    try {
-      await this.storage.deleteObject(doc.storageKey);
-    } catch (err) {
-      this.logger.warn(
-        `Failed to delete storage object ${doc.storageKey}: ${(err as Error).message}`,
-      );
+    const now = new Date();
+    const purgeAfter = new Date(
+      now.getTime() + DocumentsService.ARCHIVE_WINDOW_DAYS * 24 * 60 * 60 * 1000,
+    );
+    const updated = await this.prisma.document.update({
+      where: { id: doc.id },
+      data: { status: 'ARCHIVED', archivedAt: now, purgeAfter },
+    });
+    return this.toView(updated);
+  }
+
+  /** Restore an archived document back to the active list (cancels the purge). */
+  async restore(lawyerId: string | null | undefined, id: string): Promise<DocumentView> {
+    const doc = await this.getOwned(lawyerId, id);
+    const updated = await this.prisma.document.update({
+      where: { id: doc.id },
+      data: {
+        status: doc.ocrText ? 'OCR_DONE' : 'UPLOADED',
+        archivedAt: null,
+        purgeAfter: null,
+      },
+    });
+    return this.toView(updated);
+  }
+
+  /**
+   * Permanently delete every archived document whose 30-day window has elapsed.
+   * Invoked by DocumentsPurgeService on a schedule. Best-effort + defensive so a
+   * single failure never aborts the sweep.
+   */
+  async purgeExpired(): Promise<number> {
+    const due = await this.prisma.document.findMany({
+      where: { status: 'ARCHIVED', purgeAfter: { lte: new Date() } },
+      select: { id: true, storageKey: true },
+    });
+
+    let purged = 0;
+    for (const doc of due) {
+      try {
+        await this.storage.deleteObject(doc.storageKey);
+      } catch (err) {
+        this.logger.warn(
+          `Purge: failed to delete storage object ${doc.storageKey}: ${(err as Error).message}`,
+        );
+      }
+      try {
+        await this.prisma.document.delete({ where: { id: doc.id } });
+        purged += 1;
+      } catch (err) {
+        this.logger.warn(`Purge: failed to delete document ${doc.id}: ${(err as Error).message}`);
+      }
     }
-
-    await this.prisma.document.delete({ where: { id: doc.id } });
+    if (purged > 0) {
+      this.logger.log(`Purged ${purged} archived document(s) past their 30-day window`);
+    }
+    return purged;
   }
 
   // --- helpers --------------------------------------------------------------
@@ -188,6 +254,7 @@ export class DocumentsService {
       version: doc.version,
       hasOcr: !!doc.ocrText,
       downloadUrl,
+      archivedAt: doc.archivedAt ? doc.archivedAt.toISOString() : null,
       createdAt: doc.createdAt.toISOString(),
       updatedAt: doc.updatedAt.toISOString(),
     };

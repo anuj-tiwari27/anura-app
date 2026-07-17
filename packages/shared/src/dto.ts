@@ -182,6 +182,8 @@ export interface DocumentView {
   version: number;
   hasOcr: boolean;
   downloadUrl: string | null;
+  /** Set when status=ARCHIVED; the document is purged 30 days after this. */
+  archivedAt: string | null;
   createdAt: string;
   updatedAt: string;
 }

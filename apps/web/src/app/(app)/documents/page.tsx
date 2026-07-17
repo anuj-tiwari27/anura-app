@@ -14,6 +14,7 @@ import {
   PageHeader,
   Select,
   Skeleton,
+  Tabs,
 } from '@/components/ui';
 import { DocumentsTable } from '@/components/documents/documents-table';
 import { UploadDocument } from '@/components/documents/upload-document';
@@ -26,6 +27,7 @@ export default function DocumentsPage() {
   const [caseId, setCaseId] = useState('');
   const [page, setPage] = useState(1);
   const [uploadOpen, setUploadOpen] = useState(false);
+  const [view, setView] = useState<'active' | 'archived'>('active');
 
   const { data: cases } = useCaseOptions();
 
@@ -35,11 +37,19 @@ export default function DocumentsPage() {
     return map;
   }, [cases]);
 
+  const archived = view === 'archived';
+
   const query = useQuery({
-    queryKey: ['documents', { search, caseId, page }],
+    queryKey: ['documents', { search, caseId, page, archived }],
     queryFn: () =>
       api.get<Paginated<DocumentView>>(
-        `/documents${buildQuery({ page, pageSize: PAGE_SIZE, search, caseId })}`,
+        `/documents${buildQuery({
+          page,
+          pageSize: PAGE_SIZE,
+          search,
+          caseId,
+          archived: archived ? true : undefined,
+        })}`,
       ),
     placeholderData: keepPreviousData,
   });
@@ -67,6 +77,18 @@ export default function DocumentsPage() {
             Upload
           </Button>
         }
+      />
+
+      <Tabs
+        tabs={[
+          { value: 'active', label: 'Active' },
+          { value: 'archived', label: 'Archived' },
+        ]}
+        value={view}
+        onValueChange={(v) => {
+          setView(v as 'active' | 'archived');
+          setPage(1);
+        }}
       />
 
       <Card className="p-4">
@@ -119,11 +141,19 @@ export default function DocumentsPage() {
       ) : documents.length === 0 ? (
         <EmptyState
           icon={FileText}
-          title={hasFilters ? 'No matching documents' : 'No documents yet'}
+          title={
+            archived
+              ? 'No archived documents'
+              : hasFilters
+                ? 'No matching documents'
+                : 'No documents yet'
+          }
           description={
-            hasFilters
-              ? 'Try a different search or clear the case filter.'
-              : 'Upload your first document to start building your case files.'
+            archived
+              ? 'Documents you archive appear here and are permanently deleted after 30 days.'
+              : hasFilters
+                ? 'Try a different search or clear the case filter.'
+                : 'Upload your first document to start building your case files.'
           }
           action={
             hasFilters ? (

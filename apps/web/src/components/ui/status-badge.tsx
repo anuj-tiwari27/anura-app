@@ -23,6 +23,7 @@ const documentVariant: Record<DocumentStatus, Variant> = {
   OCR_DONE: 'default',
   INDEXED: 'success',
   FAILED: 'destructive',
+  ARCHIVED: 'secondary',
 };
 
 const invoiceVariant: Record<InvoiceStatus, Variant> = {

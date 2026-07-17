@@ -87,6 +87,7 @@ export const DocumentStatus = {
   OCR_DONE: 'OCR_DONE',
   INDEXED: 'INDEXED',
   FAILED: 'FAILED',
+  ARCHIVED: 'ARCHIVED',
 } as const;
 export type DocumentStatus = (typeof DocumentStatus)[keyof typeof DocumentStatus];
 

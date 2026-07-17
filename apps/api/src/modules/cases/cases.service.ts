@@ -212,11 +212,8 @@ export class CasesService {
     return this.getDetail(lawyerId, id);
   }
 
-  async remove(lawyerIdRaw: string | null | undefined, id: string): Promise<void> {
-    const lawyerId = this.requireLawyer(lawyerIdRaw);
-    await this.findOwnedCaseOrThrow(id, lawyerId);
-    await this.prisma.case.delete({ where: { id } });
-  }
+  // Cases are never hard-deleted. Status transitions (DISPOSED / DRAFT / etc.)
+  // go through update() above, which records a STATUS_CHANGE timeline entry.
 
   // ---------------------------------------------------------------------------
   // Parties

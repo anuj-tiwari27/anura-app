@@ -84,6 +84,7 @@ enum DocumentStatus {
   OCR_DONE
   INDEXED
   FAILED
+  ARCHIVED
 }
 
 enum InvoiceStatus {
@@ -321,6 +322,8 @@ model Document {
   version    Int            @default(1)
   ocrText    String?
   checksum   String?
+  archivedAt DateTime?
+  purgeAfter DateTime? // when status=ARCHIVED, the cron hard-deletes after this time (30-day window)
   createdAt  DateTime       @default(now())
   updatedAt  DateTime       @updatedAt
 
@@ -330,6 +333,7 @@ model Document {
 
   @@index([lawyerId])
   @@index([caseId])
+  @@index([purgeAfter])
 }
 
 model DocumentVersion {

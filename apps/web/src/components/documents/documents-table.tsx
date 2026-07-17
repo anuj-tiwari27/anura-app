@@ -4,14 +4,15 @@ import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
+  Archive,
   Download,
   FileArchive,
   FileImage,
   FileSpreadsheet,
   FileText,
   File as FileIcon,
+  RotateCcw,
   ScanText,
-  Trash2,
   type LucideIcon,
 } from 'lucide-react';
 import type { DocumentView } from '@anura/shared';
@@ -31,6 +32,14 @@ function fileIconFor(mimeType: string, filename: string): LucideIcon {
   return FileIcon;
 }
 
+/** The date an archived document is permanently deleted (30 days after archiving). */
+function purgeDate(archivedAt: string | null): string | null {
+  if (!archivedAt) return null;
+  const d = new Date(archivedAt);
+  d.setDate(d.getDate() + 30);
+  return formatDate(d.toISOString());
+}
+
 interface DocumentsTableProps {
   documents: DocumentView[];
   /** Map of caseId -> case title, for showing the linked case column. */
@@ -39,19 +48,28 @@ interface DocumentsTableProps {
 
 export function DocumentsTable({ documents, caseTitles }: DocumentsTableProps) {
   const queryClient = useQueryClient();
-  const [toDelete, setToDelete] = useState<DocumentView | null>(null);
+  const [toArchive, setToArchive] = useState<DocumentView | null>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
-  const deleteMutation = useMutation({
-    mutationFn: (id: string) => api.delete<void>(`/documents/${id}`),
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['documents'] });
+
+  const archiveMutation = useMutation({
+    mutationFn: (id: string) => api.post<DocumentView>(`/documents/${id}/archive`),
     onSuccess: () => {
-      toast.success('Document deleted');
-      setToDelete(null);
-      void queryClient.invalidateQueries({ queryKey: ['documents'] });
+      toast.success('Document archived — recoverable for 30 days');
+      setToArchive(null);
+      void invalidate();
     },
-    onError: (err) => {
-      toast.error(err instanceof ApiError ? err.message : 'Something went wrong');
+    onError: (err) => toast.error(err instanceof ApiError ? err.message : 'Something went wrong'),
+  });
+
+  const restoreMutation = useMutation({
+    mutationFn: (id: string) => api.post<DocumentView>(`/documents/${id}/restore`),
+    onSuccess: () => {
+      toast.success('Document restored');
+      void invalidate();
     },
+    onError: (err) => toast.error(err instanceof ApiError ? err.message : 'Something went wrong'),
   });
 
   async function handleDownload(doc: DocumentView) {
@@ -92,6 +110,8 @@ export function DocumentsTable({ documents, caseTitles }: DocumentsTableProps) {
           {documents.map((doc) => {
             const Icon = fileIconFor(doc.mimeType, doc.filename);
             const linkedCase = doc.caseId ? caseTitles[doc.caseId] : null;
+            const isArchived = doc.status === 'ARCHIVED';
+            const deletesOn = purgeDate(doc.archivedAt);
             return (
               <TR key={doc.id}>
                 <TD>
@@ -117,11 +137,15 @@ export function DocumentsTable({ documents, caseTitles }: DocumentsTableProps) {
                 <TD>
                   <div className="flex flex-wrap items-center gap-1.5">
                     <StatusBadge kind="document" value={doc.status} />
-                    {doc.hasOcr && (
-                      <Badge variant="outline" className="gap-1">
-                        <ScanText className="h-3 w-3" />
-                        OCR
-                      </Badge>
+                    {isArchived && deletesOn ? (
+                      <span className="text-xs text-muted-foreground">Deletes {deletesOn}</span>
+                    ) : (
+                      doc.hasOcr && (
+                        <Badge variant="outline" className="gap-1">
+                          <ScanText className="h-3 w-3" />
+                          OCR
+                        </Badge>
+                      )
                     )}
                   </div>
                 </TD>
@@ -142,15 +166,32 @@ export function DocumentsTable({ documents, caseTitles }: DocumentsTableProps) {
                     >
                       {downloadingId !== doc.id && <Download className="h-4 w-4" />}
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      aria-label={`Delete ${doc.filename}`}
-                      className="text-muted-foreground hover:text-destructive"
-                      onClick={() => setToDelete(doc)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    {isArchived ? (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label={`Restore ${doc.filename}`}
+                        title="Restore"
+                        className="text-muted-foreground hover:text-success"
+                        loading={restoreMutation.isPending && restoreMutation.variables === doc.id}
+                        onClick={() => restoreMutation.mutate(doc.id)}
+                      >
+                        {!(restoreMutation.isPending && restoreMutation.variables === doc.id) && (
+                          <RotateCcw className="h-4 w-4" />
+                        )}
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label={`Archive ${doc.filename}`}
+                        title="Archive"
+                        className="text-muted-foreground hover:text-foreground"
+                        onClick={() => setToArchive(doc)}
+                      >
+                        <Archive className="h-4 w-4" />
+                      </Button>
+                    )}
                   </div>
                 </TD>
               </TR>
@@ -160,35 +201,30 @@ export function DocumentsTable({ documents, caseTitles }: DocumentsTableProps) {
       </Table>
 
       <Modal
-        open={!!toDelete}
-        onClose={() => !deleteMutation.isPending && setToDelete(null)}
-        title="Delete document"
+        open={!!toArchive}
+        onClose={() => !archiveMutation.isPending && setToArchive(null)}
+        title="Archive document"
         description={
-          toDelete
-            ? `"${toDelete.filename}" will be permanently removed. This cannot be undone.`
+          toArchive
+            ? `"${toArchive.filename}" will be moved to Archived and permanently deleted after 30 days. You can restore it any time before then.`
             : undefined
         }
         footer={
           <>
-            <Button
-              variant="outline"
-              onClick={() => setToDelete(null)}
-              disabled={deleteMutation.isPending}
-            >
+            <Button variant="outline" onClick={() => setToArchive(null)} disabled={archiveMutation.isPending}>
               Cancel
             </Button>
             <Button
-              variant="destructive"
-              loading={deleteMutation.isPending}
-              onClick={() => toDelete && deleteMutation.mutate(toDelete.id)}
+              loading={archiveMutation.isPending}
+              onClick={() => toArchive && archiveMutation.mutate(toArchive.id)}
             >
-              Delete
+              Archive
             </Button>
           </>
         }
       >
         <p className="text-sm text-muted-foreground">
-          Deleting a document also removes it from any linked case and search index.
+          Archiving hides the document from your active list. Nothing is deleted immediately.
         </p>
       </Modal>
     </>

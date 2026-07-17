@@ -1,9 +1,7 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
-  HttpCode,
   Param,
   Post,
   Query,
@@ -71,12 +69,21 @@ export class DocumentsController {
     });
   }
 
-  @Delete(':id')
-  @HttpCode(204)
-  remove(
+  /** Soft-delete: archive with a 30-day restore window before permanent deletion. */
+  @Post(':id/archive')
+  archive(
     @CurrentUser('lawyerId') lawyerId: string | null,
     @Param('id') id: string,
-  ): Promise<void> {
-    return this.documents.remove(lawyerId, id);
+  ): Promise<DocumentView> {
+    return this.documents.archive(lawyerId, id);
+  }
+
+  /** Restore an archived document back to the active list. */
+  @Post(':id/restore')
+  restore(
+    @CurrentUser('lawyerId') lawyerId: string | null,
+    @Param('id') id: string,
+  ): Promise<DocumentView> {
+    return this.documents.restore(lawyerId, id);
   }
 }

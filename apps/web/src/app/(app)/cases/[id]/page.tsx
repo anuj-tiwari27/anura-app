@@ -7,6 +7,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ArrowLeft,
   CalendarClock,
+  ChevronDown,
   FileText,
   MessageSquare,
   Pencil,
@@ -15,6 +16,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
+  CaseStatus,
   Labels,
   type CaseDetailView,
   type CaseNoteView,
@@ -31,6 +33,8 @@ import {
   Card,
   CardContent,
   EmptyState,
+  Dropdown,
+  DropdownItem,
   Modal,
   Skeleton,
   StatusBadge,
@@ -59,7 +63,6 @@ export default function CaseDetailPage() {
 
   const [tab, setTab] = useState<TabKey>('overview');
   const [editOpen, setEditOpen] = useState(false);
-  const [deleteOpen, setDeleteOpen] = useState(false);
   const [partyOpen, setPartyOpen] = useState(false);
   const [timelineOpen, setTimelineOpen] = useState(false);
   const [noteBody, setNoteBody] = useState('');
@@ -86,12 +89,12 @@ export default function CaseDetailPage() {
     onError: (err) => toast.error(err instanceof ApiError ? err.message : 'Something went wrong'),
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: () => api.delete<void>(`/cases/${id}`),
-    onSuccess: () => {
+  const statusMutation = useMutation({
+    mutationFn: (status: CaseStatus) => api.patch<CaseDetailView>(`/cases/${id}`, { status }),
+    onSuccess: (updated) => {
+      void invalidate();
       void queryClient.invalidateQueries({ queryKey: ['cases'] });
-      toast.success('Case deleted');
-      router.push('/cases');
+      toast.success(`Case moved to ${Labels.CaseStatus[updated.status]}`);
     },
     onError: (err) => toast.error(err instanceof ApiError ? err.message : 'Something went wrong'),
   });
@@ -167,7 +170,7 @@ export default function CaseDetailPage() {
           title={notFound ? 'Case not found' : 'Could not load case'}
           description={
             notFound
-              ? 'This case may have been deleted or you do not have access to it.'
+              ? 'This case does not exist or you do not have access to it.'
               : 'Something went wrong while loading this case. Please try again.'
           }
           action={
@@ -207,10 +210,28 @@ export default function CaseDetailPage() {
             <Pencil className="h-4 w-4" />
             Edit
           </Button>
-          <Button variant="outline" className="text-destructive" onClick={() => setDeleteOpen(true)}>
-            <Trash2 className="h-4 w-4" />
-            Delete
-          </Button>
+          <Dropdown
+            align="right"
+            trigger={
+              <span className="inline-flex h-10 items-center gap-2 rounded-md border border-border bg-card px-4 text-sm font-medium transition-colors hover:bg-muted">
+                Change status
+                <ChevronDown className="h-4 w-4" />
+              </span>
+            }
+          >
+            {Object.values(CaseStatus).map((s) => (
+              <DropdownItem
+                key={s}
+                disabled={s === c.status || statusMutation.isPending}
+                onClick={() => statusMutation.mutate(s)}
+              >
+                {Labels.CaseStatus[s]}
+                {s === c.status && (
+                  <span className="ml-auto text-xs text-muted-foreground">current</span>
+                )}
+              </DropdownItem>
+            ))}
+          </Dropdown>
         </div>
       </div>
 
@@ -260,28 +281,6 @@ export default function CaseDetailPage() {
           onSubmit={(payload) => editMutation.mutate(payload)}
           onCancel={() => setEditOpen(false)}
         />
-      </Modal>
-
-      {/* Delete confirm */}
-      <Modal
-        open={deleteOpen}
-        onClose={() => setDeleteOpen(false)}
-        title="Delete case"
-        description="This permanently removes the case along with its parties, timeline and notes. This cannot be undone."
-        footer={
-          <>
-            <Button variant="ghost" onClick={() => setDeleteOpen(false)} disabled={deleteMutation.isPending}>
-              Cancel
-            </Button>
-            <Button variant="destructive" loading={deleteMutation.isPending} onClick={() => deleteMutation.mutate()}>
-              Delete case
-            </Button>
-          </>
-        }
-      >
-        <p className="text-sm text-muted-foreground">
-          You are about to delete <span className="font-medium text-foreground">{c.title}</span>.
-        </p>
       </Modal>
 
       <PartyModal
