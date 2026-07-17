@@ -350,7 +350,7 @@ export class CasesService {
       where: { id, lawyerId },
       include: {
         parties: { orderBy: { createdAt: 'asc' } },
-        timeline: { orderBy: { eventDate: 'asc' } },
+        timeline: { orderBy: { eventDate: 'desc' } },
         notes: {
           orderBy: { createdAt: 'desc' },
           include: { author: { select: { fullName: true } } },

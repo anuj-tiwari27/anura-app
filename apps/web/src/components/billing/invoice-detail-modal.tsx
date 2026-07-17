@@ -2,10 +2,13 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { Download } from 'lucide-react';
 import { InvoiceStatus, Labels, type InvoiceView } from '@anura/shared';
 import { api, ApiError } from '@/lib/api-client';
+import { useAuth } from '@/lib/auth-store';
 import { Button, Field, Modal, Select, StatusBadge, Table, TBody, TD, TH, THead, TR } from '@/components/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
+import { printInvoice } from './print-invoice';
 
 interface InvoiceDetailModalProps {
   invoice: InvoiceView | null;
@@ -14,6 +17,7 @@ interface InvoiceDetailModalProps {
 
 export function InvoiceDetailModal({ invoice, onClose }: InvoiceDetailModalProps) {
   const queryClient = useQueryClient();
+  const user = useAuth((s) => s.user);
 
   const updateStatus = useMutation({
     mutationFn: (status: InvoiceStatus) =>
@@ -99,9 +103,21 @@ export function InvoiceDetailModal({ invoice, onClose }: InvoiceDetailModalProps
                 ))}
               </Select>
             </Field>
-            <Button variant="outline" onClick={onClose}>
-              Close
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  const ok = printInvoice(invoice, user?.fullName ?? 'Advocate');
+                  if (!ok) toast.error('Allow pop-ups to download the invoice');
+                }}
+              >
+                <Download className="h-4 w-4" />
+                Download
+              </Button>
+              <Button variant="outline" onClick={onClose}>
+                Close
+              </Button>
+            </div>
           </div>
         </div>
       )}

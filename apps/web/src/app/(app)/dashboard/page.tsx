@@ -109,7 +109,6 @@ export default function DashboardPage() {
               icon={Banknote}
               tone="destructive"
               href="/billing"
-              hint="Sent & overdue"
             />
           </div>
 
