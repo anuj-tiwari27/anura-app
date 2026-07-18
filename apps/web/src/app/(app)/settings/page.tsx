@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { PageHeader, Tabs, type TabItem } from '@/components/ui';
 import { AccountTab } from '@/components/settings/account-tab';
+import { ActivityTab } from '@/components/settings/activity-tab';
 import { NotificationsTab } from '@/components/settings/notifications-tab';
 import { PlanBillingTab } from '@/components/settings/plan-billing-tab';
 import { ProfileTab } from '@/components/settings/profile-tab';
@@ -12,6 +13,7 @@ const TABS: TabItem[] = [
   { value: 'account', label: 'Account' },
   { value: 'billing', label: 'Plan & Billing' },
   { value: 'notifications', label: 'Notifications' },
+  { value: 'activity', label: 'Activity' },
 ];
 
 const TAB_VALUES = new Set(TABS.map((t) => t.value));
@@ -43,6 +45,7 @@ export default function SettingsPage() {
         {tab === 'account' && <AccountTab />}
         {tab === 'billing' && <PlanBillingTab />}
         {tab === 'notifications' && <NotificationsTab />}
+        {tab === 'activity' && <ActivityTab />}
       </div>
     </div>
   );

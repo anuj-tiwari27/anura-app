@@ -59,6 +59,12 @@ export default () => ({
     apiVersion: process.env.WHATSAPP_API_VERSION ?? 'v21.0',
   },
 
+  email: {
+    provider: (process.env.EMAIL_PROVIDER ?? 'log') as 'log' | 'resend',
+    apiKey: process.env.RESEND_API_KEY ?? '',
+    from: process.env.EMAIL_FROM ?? 'Anura <invoices@anura.legal>',
+  },
+
   payments: {
     provider: (process.env.PAYMENTS_PROVIDER ?? 'none') as 'none' | 'stripe' | 'razorpay',
     stripeSecretKey: process.env.STRIPE_SECRET_KEY ?? '',

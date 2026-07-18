@@ -14,6 +14,7 @@ import type { AuthResponse, AuthTokens, JwtPayload, PublicUser } from '@anura/sh
 import type { Lawyer, User } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { toPublicUser } from '../../common/mappers/user.mapper';
+import { AuditService } from '../audit/audit.service';
 import type { AppConfig } from '../../config/configuration';
 
 const BCRYPT_ROUNDS = 10;

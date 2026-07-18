@@ -1,11 +1,13 @@
+import { randomBytes } from 'node:crypto';
 import {
   BadRequestException,
   Injectable,
   Logger,
   NotFoundException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Prisma } from '@prisma/client';
-import type { Invoice, Subscription } from '@prisma/client';
+import type { CaseParty, Invoice, Subscription } from '@prisma/client';
 import {
   DEFAULT_GST_PERCENT,
   InvoiceStatus,
@@ -15,18 +17,25 @@ import {
 } from '@anura/shared';
 import type {
   InvoiceLineItem,
+  InvoiceShareResult,
   InvoiceView,
   Paginated,
   PlanDefinition,
+  PublicInvoiceView,
+  SendInvoiceResult,
   SubscriptionView,
 } from '@anura/shared';
 
 import { PrismaService } from '../../prisma/prisma.service';
 import { PaymentsService } from '../../integrations/payments/payments.service';
 import type { CheckoutResult } from '../../integrations/payments/payments.service';
+import { WhatsAppService } from '../../integrations/messaging/whatsapp.service';
+import { EmailService } from '../../integrations/email/email.service';
 import { paginated, skipTake } from '../../common/dto/pagination.dto';
+import { AuditService } from '../audit/audit.service';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
 import { UpdateInvoiceDto } from './dto/update-invoice.dto';
+import { SendInvoiceDto } from './dto/send-invoice.dto';
 
 @Injectable()
 export class BillingService {
@@ -35,6 +44,10 @@ export class BillingService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly payments: PaymentsService,
+    private readonly config: ConfigService,
+    private readonly whatsapp: WhatsAppService,
+    private readonly email: EmailService,
+    private readonly audit: AuditService,
   ) {}
 
   // -- Plans ----------------------------------------------------------------
@@ -165,6 +178,122 @@ export class BillingService {
 
     const updated = await this.prisma.invoice.update({ where: { id }, data });
     return this.toInvoiceView(updated);
+  }
+
+  // -- Share link + send ------------------------------------------------------
+
+  /** Generates (or reuses) the public share link for an invoice. */
+  async shareInvoice(lawyerId: string, id: string): Promise<InvoiceShareResult> {
+    const invoice = await this.findOwnedInvoice(lawyerId, id);
+    const token = await this.ensureShareToken(invoice);
+    return { token, url: this.shareUrl(token) };
+  }
+
+  /** Public (unauthenticated) invoice lookup by share token. */
+  async getPublicInvoice(token: string): Promise<PublicInvoiceView> {
+    const invoice = await this.prisma.invoice.findUnique({
+      where: { shareToken: token },
+      include: { lawyer: { include: { user: true } } },
+    });
+    if (!invoice) {
+      throw new NotFoundException('Invoice not found');
+    }
+    return {
+      ...this.toInvoiceView(invoice),
+      fromName: invoice.lawyer.user.fullName ?? null,
+    };
+  }
+
+  /** Sends the invoice share link to the client via WhatsApp or email. */
+  async sendInvoice(
+    lawyerId: string,
+    id: string,
+    dto: SendInvoiceDto,
+    userId?: string,
+  ): Promise<SendInvoiceResult> {
+    const invoice = await this.prisma.invoice.findUnique({
+      where: { id },
+      include: {
+        lawyer: { include: { user: true } },
+        case: { include: { parties: true } },
+      },
+    });
+    if (!invoice || invoice.lawyerId !== lawyerId) {
+      throw new NotFoundException('Invoice not found');
+    }
+
+    const token = await this.ensureShareToken(invoice);
+    const url = this.shareUrl(token);
+
+    const to = dto.to ?? this.resolveRecipient(invoice.case?.parties ?? [], dto.channel);
+    if (!to) {
+      throw new BadRequestException(
+        'No client phone/email on the linked case — add it to the client party or pass one explicitly',
+      );
+    }
+
+    const fromName = invoice.lawyer.user.fullName;
+    const total = new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: invoice.currency,
+      maximumFractionDigits: 2,
+    }).format(Number(invoice.total));
+    const dueLine = invoice.dueAt
+      ? ` It is due by ${invoice.dueAt.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}.`
+      : '';
+    const message =
+      `Dear ${invoice.clientName ?? 'client'},\n\n` +
+      `Please find invoice ${invoice.number} for ${total}.${dueLine}\n` +
+      `View and download it here: ${url}\n\n` +
+      `Regards,\n${fromName ?? 'Your advocate'}`;
+
+    const result =
+      dto.channel === 'whatsapp'
+        ? await this.whatsapp.sendText(to, message)
+        : await this.email.sendEmail({
+            to,
+            subject: `Invoice ${invoice.number} from ${fromName ?? 'your advocate'}`,
+            text: message,
+          });
+
+    // Sending a draft invoice implicitly issues it.
+    if (invoice.status === InvoiceStatus.DRAFT) {
+      await this.prisma.invoice.update({
+        where: { id: invoice.id },
+        data: { status: InvoiceStatus.SENT, issuedAt: new Date() },
+      });
+    }
+
+    void this.audit.log({
+      actorId: userId ?? null,
+      action: 'invoice.send',
+      entityType: 'INVOICE',
+      entityId: invoice.id,
+      meta: { number: invoice.number, channel: dto.channel },
+    });
+    return { ok: result.ok, channel: dto.channel, to, url };
+  }
+
+  private shareUrl(token: string): string {
+    return `${this.config.get<string>('webOrigin')}/invoice/${token}`;
+  }
+
+  private async ensureShareToken(invoice: Invoice): Promise<string> {
+    if (invoice.shareToken) return invoice.shareToken;
+    const token = randomBytes(24).toString('base64url');
+    await this.prisma.invoice.update({
+      where: { id: invoice.id },
+      data: { shareToken: token },
+    });
+    return token;
+  }
+
+  /** Picks the best recipient from case parties: client party first, then any. */
+  private resolveRecipient(parties: CaseParty[], channel: 'whatsapp' | 'email'): string | null {
+    const field = channel === 'whatsapp' ? 'contactPhone' : 'contactEmail';
+    const client = parties.find((p) => p.isClient && p[field]);
+    const fallback = parties.find((p) => p[field]);
+    return client?.[field] ?? fallback?.[field] ?? null;
   }
 
   // -- Stripe webhook -------------------------------------------------------

@@ -17,6 +17,7 @@ import { AiModule } from './integrations/ai/ai.module';
 import { StorageModule } from './integrations/storage/storage.module';
 import { OcrModule } from './integrations/ocr/ocr.module';
 import { MessagingModule } from './integrations/messaging/messaging.module';
+import { EmailModule } from './integrations/email/email.module';
 import { PaymentsModule } from './integrations/payments/payments.module';
 import { PushModule } from './integrations/push/push.module';
 import { QueueModule } from './integrations/queue/queue.module';
@@ -51,6 +52,7 @@ import { DashboardModule } from './modules/dashboard/dashboard.module';
     StorageModule,
     OcrModule,
     MessagingModule,
+    EmailModule,
     PaymentsModule,
     PushModule,
     QueueModule,

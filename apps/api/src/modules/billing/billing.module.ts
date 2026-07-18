@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { AuditModule } from '../audit/audit.module';
 import { BillingController } from './billing.controller';
 import { BillingService } from './billing.service';
 
@@ -8,6 +9,7 @@ import { BillingService } from './billing.service';
  * injected from their global modules (no imports needed here).
  */
 @Module({
+  imports: [AuditModule],
   controllers: [BillingController],
   providers: [BillingService],
   exports: [BillingService],

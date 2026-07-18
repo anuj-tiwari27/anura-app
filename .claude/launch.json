@@ -12,7 +12,8 @@
       "name": "anura-api",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev:api"],
-      "port": 4000
+      "port": 4000,
+      "autoPort": false
     }
   ]
 }

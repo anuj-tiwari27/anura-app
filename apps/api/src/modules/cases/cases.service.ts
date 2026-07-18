@@ -23,6 +23,7 @@ import { CaseStatus, TimelineEventType } from '@anura/shared';
 
 import { PrismaService } from '../../prisma/prisma.service';
 import { paginated, skipTake } from '../../common/dto/pagination.dto';
+import { AuditService } from '../audit/audit.service';
 import { CreateCaseDto } from './dto/create-case.dto';
 import { UpdateCaseDto } from './dto/update-case.dto';
 import { QueryCasesDto } from './dto/query-cases.dto';
@@ -40,7 +41,10 @@ type CaseWithRelations = Case & {
 
 @Injectable()
 export class CasesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly audit: AuditService,
+  ) {}
 
   // ---------------------------------------------------------------------------
   // Guards
@@ -103,7 +107,11 @@ export class CasesService {
     return paginated(items, total, page, pageSize);
   }
 
-  async create(lawyerIdRaw: string | null | undefined, dto: CreateCaseDto): Promise<CaseDetailView> {
+  async create(
+    lawyerIdRaw: string | null | undefined,
+    dto: CreateCaseDto,
+    userId?: string,
+  ): Promise<CaseDetailView> {
     const lawyerId = this.requireLawyer(lawyerIdRaw);
 
     const nextHearingDate = dto.nextHearingDate ? new Date(dto.nextHearingDate) : null;
@@ -148,6 +156,13 @@ export class CasesService {
       },
     });
 
+    void this.audit.log({
+      actorId: userId ?? null,
+      action: 'case.create',
+      entityType: 'CASE',
+      entityId: created.id,
+      meta: { title: created.title },
+    });
     return this.getDetail(lawyerId, created.id);
   }
 
@@ -157,7 +172,12 @@ export class CasesService {
     return this.getDetail(lawyerId, id);
   }
 
-  async update(lawyerIdRaw: string | null | undefined, id: string, dto: UpdateCaseDto): Promise<CaseDetailView> {
+  async update(
+    lawyerIdRaw: string | null | undefined,
+    id: string,
+    dto: UpdateCaseDto,
+    userId?: string,
+  ): Promise<CaseDetailView> {
     const lawyerId = this.requireLawyer(lawyerIdRaw);
     const existing = await this.findOwnedCaseOrThrow(id, lawyerId);
 
@@ -209,6 +229,16 @@ export class CasesService {
     }
 
     await this.prisma.case.update({ where: { id }, data });
+
+    void this.audit.log({
+      actorId: userId ?? null,
+      action: statusChanged ? 'case.status_change' : 'case.update',
+      entityType: 'CASE',
+      entityId: id,
+      meta: statusChanged
+        ? { from: existing.status, to: dto.status }
+        : { fields: Object.keys(data) },
+    });
     return this.getDetail(lawyerId, id);
   }
 

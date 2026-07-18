@@ -15,9 +15,12 @@ import { Type } from 'class-transformer';
 import { IsEnum, IsOptional } from 'class-validator';
 import { InvoiceStatus } from '@anura/shared';
 import type {
+  InvoiceShareResult,
   InvoiceView,
   Paginated,
   PlanDefinition,
+  PublicInvoiceView,
+  SendInvoiceResult,
   SubscriptionView,
 } from '@anura/shared';
 import type { CheckoutResult } from '../../integrations/payments/payments.service';
@@ -30,6 +33,7 @@ import { BillingService } from './billing.service';
 import { CheckoutDto } from './dto/checkout.dto';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
 import { UpdateInvoiceDto } from './dto/update-invoice.dto';
+import { SendInvoiceDto } from './dto/send-invoice.dto';
 
 /** Query params for the invoice list endpoint. */
 class ListInvoicesQueryDto extends PaginationQueryDto {
@@ -82,6 +86,13 @@ export class BillingController {
     return this.billing.createInvoice(requireLawyer(lawyerId), dto);
   }
 
+  // Public share-link lookup — declared before the parameterized invoice routes.
+  @Public()
+  @Get('public/invoices/:token')
+  getPublicInvoice(@Param('token') token: string): Promise<PublicInvoiceView> {
+    return this.billing.getPublicInvoice(token);
+  }
+
   @Get('invoices/:id')
   getInvoice(
     @CurrentUser('lawyerId') lawyerId: string | null,
@@ -97,6 +108,24 @@ export class BillingController {
     @Body() dto: UpdateInvoiceDto,
   ): Promise<InvoiceView> {
     return this.billing.updateInvoice(requireLawyer(lawyerId), id, dto);
+  }
+
+  @Post('invoices/:id/share')
+  shareInvoice(
+    @CurrentUser('lawyerId') lawyerId: string | null,
+    @Param('id') id: string,
+  ): Promise<InvoiceShareResult> {
+    return this.billing.shareInvoice(requireLawyer(lawyerId), id);
+  }
+
+  @Post('invoices/:id/send')
+  sendInvoice(
+    @CurrentUser('lawyerId') lawyerId: string | null,
+    @CurrentUser('sub') userId: string,
+    @Param('id') id: string,
+    @Body() dto: SendInvoiceDto,
+  ): Promise<SendInvoiceResult> {
+    return this.billing.sendInvoice(requireLawyer(lawyerId), id, dto, userId);
   }
 
   @Public()

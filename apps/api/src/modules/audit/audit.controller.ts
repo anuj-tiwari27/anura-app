@@ -1,8 +1,8 @@
 import { Controller, Get, Query } from '@nestjs/common';
-import type { Paginated } from '@anura/shared';
+import type { AuditLogView, Paginated } from '@anura/shared';
 import { UserRole } from '@anura/shared';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { AuditService, type AuditRowView } from './audit.service';
+import { AuditService } from './audit.service';
 import { QueryAuditDto } from './dto/query-audit.dto';
 
 @Controller('audit')
@@ -18,7 +18,7 @@ export class AuditController {
     @CurrentUser('sub') actorId: string,
     @CurrentUser('role') role: UserRole,
     @Query() query: QueryAuditDto,
-  ): Promise<Paginated<AuditRowView>> {
+  ): Promise<Paginated<AuditLogView>> {
     return this.auditService.list(role, actorId, query);
   }
 }

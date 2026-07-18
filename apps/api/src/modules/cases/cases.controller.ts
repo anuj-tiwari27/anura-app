@@ -55,9 +55,10 @@ export class CasesController {
   @Post()
   create(
     @CurrentUser('lawyerId') lawyerId: string | null,
+    @CurrentUser('sub') userId: string,
     @Body() dto: CreateCaseDto,
   ): Promise<CaseDetailView> {
-    return this.cases.create(lawyerId, dto);
+    return this.cases.create(lawyerId, dto, userId);
   }
 
   @Get(':id')
@@ -71,10 +72,11 @@ export class CasesController {
   @Patch(':id')
   update(
     @CurrentUser('lawyerId') lawyerId: string | null,
+    @CurrentUser('sub') userId: string,
     @Param('id') id: string,
     @Body() dto: UpdateCaseDto,
   ): Promise<CaseDetailView> {
-    return this.cases.update(lawyerId, id, dto);
+    return this.cases.update(lawyerId, id, dto, userId);
   }
 
   // Cases are never permanently deleted — a lawyer disposes a case or moves it

@@ -60,6 +60,10 @@ export interface PublicUser {
   role: UserRole;
   fullName: string | null;
   avatarUrl: string | null;
+  /** Identity fields live on User (single source of truth). */
+  phone: string | null;
+  city: string | null;
+  state: string | null;
   onboardingComplete: boolean;
   lawyerId: string | null;
   createdAt: string;
@@ -267,6 +271,28 @@ export interface InvoiceView {
   createdAt: string;
 }
 
+/** Invoice as rendered on the public share page (no auth). */
+export interface PublicInvoiceView extends InvoiceView {
+  /** Display name of the advocate/firm that issued the invoice. */
+  fromName: string | null;
+}
+
+/** Result of generating (or reusing) an invoice share link. */
+export interface InvoiceShareResult {
+  token: string;
+  /** Absolute URL to the public invoice page. */
+  url: string;
+}
+
+/** Result of sending an invoice to the client via a channel. */
+export interface SendInvoiceResult {
+  ok: boolean;
+  channel: 'whatsapp' | 'email';
+  /** The phone/email the invoice was sent to. */
+  to: string;
+  url: string;
+}
+
 export interface SubscriptionView {
   id: string;
   plan: SubscriptionPlan;
@@ -286,6 +312,19 @@ export interface NotificationView {
   body: string | null;
   read: boolean;
   link: string | null;
+  createdAt: string;
+}
+
+// --- Audit --------------------------------------------------------------------
+
+/** One row of the account activity / audit trail. */
+export interface AuditLogView {
+  id: string;
+  /** Machine-readable action slug, e.g. "case.status_change", "document.archive". */
+  action: string;
+  entityType: string | null;
+  entityId: string | null;
+  meta: Record<string, unknown> | null;
   createdAt: string;
 }
 

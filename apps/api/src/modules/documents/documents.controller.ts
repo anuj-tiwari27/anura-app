@@ -33,10 +33,11 @@ export class DocumentsController {
   @UseInterceptors(FileInterceptor('file'))
   upload(
     @CurrentUser('lawyerId') lawyerId: string | null,
+    @CurrentUser('sub') userId: string,
     @UploadedFile() file: Express.Multer.File,
     @Body() body: UploadDocumentDto,
   ): Promise<DocumentView> {
-    return this.documents.upload(lawyerId, file, body.caseId);
+    return this.documents.upload(lawyerId, file, body.caseId, userId);
   }
 
   @Get(':id')
@@ -59,9 +60,10 @@ export class DocumentsController {
   @Get(':id/file')
   async file(
     @CurrentUser('lawyerId') lawyerId: string | null,
+    @CurrentUser('sub') userId: string,
     @Param('id') id: string,
   ): Promise<StreamableFile> {
-    const { doc, body } = await this.documents.downloadFile(lawyerId, id);
+    const { doc, body } = await this.documents.downloadFile(lawyerId, id, userId);
     return new StreamableFile(body, {
       type: doc.mimeType,
       disposition: `attachment; filename="${encodeURIComponent(doc.filename)}"`,
@@ -73,17 +75,19 @@ export class DocumentsController {
   @Post(':id/archive')
   archive(
     @CurrentUser('lawyerId') lawyerId: string | null,
+    @CurrentUser('sub') userId: string,
     @Param('id') id: string,
   ): Promise<DocumentView> {
-    return this.documents.archive(lawyerId, id);
+    return this.documents.archive(lawyerId, id, userId);
   }
 
   /** Restore an archived document back to the active list. */
   @Post(':id/restore')
   restore(
     @CurrentUser('lawyerId') lawyerId: string | null,
+    @CurrentUser('sub') userId: string,
     @Param('id') id: string,
   ): Promise<DocumentView> {
-    return this.documents.restore(lawyerId, id);
+    return this.documents.restore(lawyerId, id, userId);
   }
 }

@@ -12,6 +12,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { StorageService } from '../../integrations/storage/storage.service';
 import { OcrService } from '../../integrations/ocr/ocr.service';
 import { paginated, skipTake } from '../../common/dto/pagination.dto';
+import { AuditService } from '../audit/audit.service';
 import type { QueryDocumentsDto } from './dto/query-documents.dto';
 
 @Injectable()
@@ -24,6 +25,7 @@ export class DocumentsService {
     private readonly prisma: PrismaService,
     private readonly storage: StorageService,
     private readonly ocr: OcrService,
+    private readonly audit: AuditService,
   ) {}
 
   /** Resolve the caller's lawyerId or reject if onboarding is incomplete. */
@@ -93,10 +95,18 @@ export class DocumentsService {
   async downloadFile(
     lawyerId: string | null | undefined,
     id: string,
+    userId?: string,
   ): Promise<{ doc: Document; body: Buffer }> {
     const doc = await this.getOwned(lawyerId, id);
     try {
       const body = await this.storage.getObject(doc.storageKey);
+      void this.audit.log({
+        actorId: userId ?? null,
+        action: 'document.download',
+        entityType: 'DOCUMENT',
+        entityId: doc.id,
+        meta: { filename: doc.filename },
+      });
       return { doc, body };
     } catch (err) {
       // Object store unreachable (e.g. MinIO/S3 down or misconfigured) — surface
@@ -112,6 +122,7 @@ export class DocumentsService {
     lawyerId: string | null | undefined,
     file: Express.Multer.File | undefined,
     caseId?: string,
+    userId?: string,
   ): Promise<DocumentView> {
     const owner = this.requireLawyerId(lawyerId);
     if (!file) throw new BadRequestException('No file uploaded');
@@ -150,6 +161,13 @@ export class DocumentsService {
       },
     });
 
+    void this.audit.log({
+      actorId: userId ?? null,
+      action: 'document.upload',
+      entityType: 'DOCUMENT',
+      entityId: doc.id,
+      meta: { filename: doc.filename, sizeBytes: doc.sizeBytes },
+    });
     return this.toView(doc);
   }
 
@@ -158,7 +176,11 @@ export class DocumentsService {
    * permanent deletion after a 30-day grace window (see DocumentsPurgeService).
    * The file is NOT removed from storage yet, so it can be restored.
    */
-  async archive(lawyerId: string | null | undefined, id: string): Promise<DocumentView> {
+  async archive(
+    lawyerId: string | null | undefined,
+    id: string,
+    userId?: string,
+  ): Promise<DocumentView> {
     const doc = await this.getOwned(lawyerId, id);
     if (doc.status === 'ARCHIVED') return this.toView(doc);
 
@@ -170,11 +192,22 @@ export class DocumentsService {
       where: { id: doc.id },
       data: { status: 'ARCHIVED', archivedAt: now, purgeAfter },
     });
+    void this.audit.log({
+      actorId: userId ?? null,
+      action: 'document.archive',
+      entityType: 'DOCUMENT',
+      entityId: doc.id,
+      meta: { filename: doc.filename, purgeAfter: purgeAfter.toISOString() },
+    });
     return this.toView(updated);
   }
 
   /** Restore an archived document back to the active list (cancels the purge). */
-  async restore(lawyerId: string | null | undefined, id: string): Promise<DocumentView> {
+  async restore(
+    lawyerId: string | null | undefined,
+    id: string,
+    userId?: string,
+  ): Promise<DocumentView> {
     const doc = await this.getOwned(lawyerId, id);
     const updated = await this.prisma.document.update({
       where: { id: doc.id },
@@ -183,6 +216,13 @@ export class DocumentsService {
         archivedAt: null,
         purgeAfter: null,
       },
+    });
+    void this.audit.log({
+      actorId: userId ?? null,
+      action: 'document.restore',
+      entityType: 'DOCUMENT',
+      entityId: doc.id,
+      meta: { filename: doc.filename },
     });
     return this.toView(updated);
   }

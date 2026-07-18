@@ -1,20 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Prisma, type AuditLog } from '@prisma/client';
-import type { Paginated } from '@anura/shared';
+import type { AuditLogView, Paginated } from '@anura/shared';
 import { UserRole } from '@anura/shared';
 import { PrismaService } from '../../prisma/prisma.service';
 import { paginated, skipTake } from '../../common/dto/pagination.dto';
 import { QueryAuditDto } from './dto/query-audit.dto';
-
-/** Shape returned by the audit API — see the route map: GET /audit. */
-export interface AuditRowView {
-  id: string;
-  action: string;
-  entityType: string | null;
-  entityId: string | null;
-  createdAt: string;
-  meta: unknown;
-}
 
 /** Params for recording an audit entry from any feature module. */
 export interface LogAuditParams {
@@ -69,7 +59,7 @@ export class AuditService {
     role: UserRole,
     actorId: string,
     query: QueryAuditDto,
-  ): Promise<Paginated<AuditRowView>> {
+  ): Promise<Paginated<AuditLogView>> {
     const page = query.page ?? 1;
     const pageSize = query.pageSize ?? 20;
 
@@ -93,18 +83,18 @@ export class AuditService {
       this.prisma.auditLog.count({ where }),
     ]);
 
-    return paginated(rows.map(toAuditRow), total, page, pageSize);
+    return paginated(rows.map(toAuditLogView), total, page, pageSize);
   }
 }
 
-/** Maps a Prisma AuditLog row to the API view shape. */
-function toAuditRow(row: AuditLog): AuditRowView {
+/** Maps a Prisma AuditLog row to the shared API view shape. */
+function toAuditLogView(row: AuditLog): AuditLogView {
   return {
     id: row.id,
     action: row.action,
     entityType: row.entityType,
     entityId: row.entityId,
+    meta: (row.meta ?? null) as Record<string, unknown> | null,
     createdAt: row.createdAt.toISOString(),
-    meta: row.meta ?? null,
   };
 }

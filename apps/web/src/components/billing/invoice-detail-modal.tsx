@@ -2,8 +2,14 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { Download } from 'lucide-react';
-import { InvoiceStatus, Labels, type InvoiceView } from '@anura/shared';
+import { Download, Link2, Mail, MessageCircle } from 'lucide-react';
+import {
+  InvoiceStatus,
+  Labels,
+  type InvoiceShareResult,
+  type InvoiceView,
+  type SendInvoiceResult,
+} from '@anura/shared';
 import { api, ApiError } from '@/lib/api-client';
 import { useAuth } from '@/lib/auth-store';
 import { Button, Field, Modal, Select, StatusBadge, Table, TBody, TD, TH, THead, TR } from '@/components/ui';
@@ -25,6 +31,33 @@ export function InvoiceDetailModal({ invoice, onClose }: InvoiceDetailModalProps
     onSuccess: (updated) => {
       toast.success(`Invoice marked ${Labels.InvoiceStatus[updated.status]}`);
       void queryClient.invalidateQueries({ queryKey: ['billing', 'invoices'] });
+    },
+    onError: (err) => {
+      toast.error(err instanceof ApiError ? err.message : 'Something went wrong');
+    },
+  });
+
+  const send = useMutation({
+    mutationFn: (channel: 'whatsapp' | 'email') =>
+      api.post<SendInvoiceResult>(`/billing/invoices/${invoice!.id}/send`, { channel }),
+    onSuccess: (res) => {
+      toast.success(`Invoice sent via ${res.channel === 'whatsapp' ? 'WhatsApp' : 'email'} to ${res.to}`);
+      void queryClient.invalidateQueries({ queryKey: ['billing', 'invoices'] });
+    },
+    onError: (err) => {
+      toast.error(err instanceof ApiError ? err.message : 'Something went wrong');
+    },
+  });
+
+  const copyLink = useMutation({
+    mutationFn: () => api.post<InvoiceShareResult>(`/billing/invoices/${invoice!.id}/share`),
+    onSuccess: async (res) => {
+      try {
+        await navigator.clipboard.writeText(res.url);
+        toast.success('Share link copied to clipboard');
+      } catch {
+        toast.info(res.url);
+      }
     },
     onError: (err) => {
       toast.error(err instanceof ApiError ? err.message : 'Something went wrong');
@@ -86,6 +119,46 @@ export function InvoiceDetailModal({ invoice, onClose }: InvoiceDetailModalProps
               <span>Total</span>
               <span className="tabular-nums">{formatCurrency(invoice.total)}</span>
             </div>
+          </div>
+
+          <div className="border-t border-border pt-4">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Send to client
+            </p>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                loading={send.isPending && send.variables === 'whatsapp'}
+                disabled={send.isPending}
+                onClick={() => send.mutate('whatsapp')}
+              >
+                <MessageCircle className="h-4 w-4" />
+                WhatsApp
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                loading={send.isPending && send.variables === 'email'}
+                disabled={send.isPending}
+                onClick={() => send.mutate('email')}
+              >
+                <Mail className="h-4 w-4" />
+                Email
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                loading={copyLink.isPending}
+                onClick={() => copyLink.mutate()}
+              >
+                <Link2 className="h-4 w-4" />
+                Copy link
+              </Button>
+            </div>
+            <p className="mt-1.5 text-xs text-muted-foreground">
+              Sends a secure view link to the contact saved on the linked case&apos;s client.
+            </p>
           </div>
 
           <div className="flex flex-col gap-3 border-t border-border pt-4 sm:flex-row sm:items-end sm:justify-between">

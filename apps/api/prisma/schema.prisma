@@ -159,6 +159,8 @@ model User {
   fullName           String?
   avatarUrl          String?
   phone              String?
+  city               String?
+  state              String?
   emailVerified      Boolean   @default(false)
   onboardingComplete Boolean   @default(false)
   createdAt          DateTime  @default(now())
@@ -199,19 +201,18 @@ model OtpCode {
   @@index([email])
 }
 
+// Identity fields (fullName, phone, city, state, avatarUrl) live on User — the
+// single source of truth. Lawyer carries only professional/practice data and is
+// read together with its User relation.
 model Lawyer {
   id               String         @id @default(cuid())
   userId           String         @unique
-  fullName         String
-  phone            String?
   barCouncilId     String?
   enrollmentYear   Int?
   experienceYears  Int?
   practiceAreas    PracticeArea[]
   courts           String[]
   primaryCourtType CourtType?
-  city             String?
-  state            String?
   bio              String?
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
@@ -467,6 +468,7 @@ model Invoice {
   issuedAt    DateTime?
   dueAt       DateTime?
   providerRef String?
+  shareToken  String?       @unique // public view/share link token (generated on demand)
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
