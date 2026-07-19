@@ -350,7 +350,7 @@ export class AuthService {
         ? 'Welcome to Anura. Use this code to verify your email address:'
         : 'Use this code to sign in to Anura:';
 
-    await this.email.sendEmail({
+    const result = await this.email.sendEmail({
       to: email,
       subject,
       text: `${intro}\n\n${code}\n\nThis code expires in ${minutes} minutes. If you did not request it, you can safely ignore this email.`,
@@ -360,6 +360,15 @@ export class AuthService {
     // code is easy to find in dev logs regardless of provider.
     if (this.config.get<string>('env') !== 'production') {
       this.logger.log(`OTP (${purpose}) for ${email}: ${code}`);
+    }
+
+    // Never claim "check your inbox" when delivery actually failed — that
+    // strands the user with no code and no explanation.
+    if (!result.ok) {
+      this.logger.error(`Could not deliver ${purpose} code to ${email}: ${result.error ?? 'unknown'}`);
+      throw new ServiceUnavailableException(
+        'We could not send the verification email right now. Please try again in a moment.',
+      );
     }
   }
 
