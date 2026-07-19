@@ -34,6 +34,13 @@ export default function LoginPage() {
       toast.success('Welcome back');
       router.replace(res.user.onboardingComplete ? '/dashboard' : '/onboarding');
     } catch (e) {
+      // 403 means the credentials were right but the address was never
+      // verified; the API has just sent a fresh code (401 stays "bad password").
+      if (e instanceof ApiError && e.status === 403) {
+        toast.message('Verify your email to continue — we sent you a code');
+        router.push(`/signup/verify?email=${encodeURIComponent(values.email)}`);
+        return;
+      }
       toast.error(e instanceof ApiError ? e.message : 'Unable to sign in');
     }
   };

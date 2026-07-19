@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   HttpCode,
+  HttpStatus,
   Param,
   Patch,
   Post,
@@ -20,6 +21,7 @@ import type {
   Paginated,
   PlanDefinition,
   PublicInvoiceView,
+  SelectPlanResult,
   SendInvoiceResult,
   SubscriptionView,
 } from '@anura/shared';
@@ -63,6 +65,20 @@ export class BillingController {
     @Body() dto: CheckoutDto,
   ): Promise<CheckoutResult> {
     return this.billing.checkout(requireLawyer(lawyerId), email, dto.plan);
+  }
+
+  /**
+   * Plan chosen during signup. Deliberately keyed off the user id (not
+   * lawyerId) because this runs before onboarding.
+   */
+  @Post('select-plan')
+  @HttpCode(HttpStatus.OK)
+  selectPlan(
+    @CurrentUser('sub') userId: string,
+    @CurrentUser('email') email: string,
+    @Body() dto: CheckoutDto,
+  ): Promise<SelectPlanResult> {
+    return this.billing.selectPlan(userId, email, dto.plan);
   }
 
   @Get('invoices')

@@ -64,9 +64,19 @@ export interface PublicUser {
   phone: string | null;
   city: string | null;
   state: string | null;
+  emailVerified: boolean;
   onboardingComplete: boolean;
   lawyerId: string | null;
   createdAt: string;
+}
+
+/**
+ * Signup no longer returns tokens: the account is created unverified and a
+ * one-time code is emailed. Tokens are issued by POST /auth/signup/verify.
+ */
+export interface SignupResult {
+  email: string;
+  verificationRequired: true;
 }
 
 export interface AuthResponse {
@@ -300,6 +310,16 @@ export interface SubscriptionView {
   seats: number;
   currentPeriodEnd: string | null;
   provider: string | null;
+}
+
+/**
+ * Result of picking a plan during signup. `checkoutUrl` is set only for paid
+ * plans when a payments provider is configured; otherwise the choice is
+ * recorded and payment can be completed later from Settings.
+ */
+export interface SelectPlanResult {
+  subscription: SubscriptionView;
+  checkoutUrl: string | null;
 }
 
 // --- Notifications ----------------------------------------------------------

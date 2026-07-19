@@ -6,9 +6,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
-import type { AuthResponse } from '@anura/shared';
+import type { SignupResult } from '@anura/shared';
 import { api, ApiError } from '@/lib/api-client';
-import { useAuth } from '@/lib/auth-store';
 import { Button, Field, Input } from '@/components/ui';
 import { GoogleButton } from '@/components/auth/google-button';
 
@@ -21,7 +20,6 @@ type FormValues = z.infer<typeof schema>;
 
 export default function SignupPage() {
   const router = useRouter();
-  const setSession = useAuth((s) => s.setSession);
   const {
     register,
     handleSubmit,
@@ -30,10 +28,11 @@ export default function SignupPage() {
 
   const onSubmit = async (values: FormValues) => {
     try {
-      const res = await api.post<AuthResponse>('/auth/signup', values, { auth: false });
-      setSession(res);
-      toast.success('Account created');
-      router.replace('/onboarding');
+      // Signup returns no tokens — the account is created unverified and a
+      // one-time code is emailed. The verify screen completes the sign-in.
+      const res = await api.post<SignupResult>('/auth/signup', values, { auth: false });
+      toast.success('Check your email for a 6-digit code');
+      router.push(`/signup/verify?email=${encodeURIComponent(res.email)}`);
     } catch (e) {
       toast.error(e instanceof ApiError ? e.message : 'Unable to create account');
     }

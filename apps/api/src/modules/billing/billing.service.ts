@@ -22,6 +22,7 @@ import type {
   Paginated,
   PlanDefinition,
   PublicInvoiceView,
+  SelectPlanResult,
   SendInvoiceResult,
   SubscriptionView,
 } from '@anura/shared';
@@ -92,6 +93,59 @@ export class BillingService {
       customerEmail: email,
       metadata: { lawyerId, plan },
     });
+  }
+
+  /**
+   * Records the plan chosen during signup. Runs before onboarding, so it
+   * resolves (or creates) the caller's Lawyer row from the user id rather than
+   * requiring a lawyerId. Free plans activate immediately; paid plans are
+   * recorded as TRIALING and, when a payments provider is configured, return a
+   * checkout URL to complete payment.
+   */
+  async selectPlan(
+    userId: string,
+    email: string,
+    plan: SubscriptionPlan,
+  ): Promise<SelectPlanResult> {
+    const definition = PLANS[plan];
+    if (!definition) {
+      throw new BadRequestException(`Unknown plan: ${plan}`);
+    }
+
+    const lawyer = await this.prisma.lawyer.upsert({
+      where: { userId },
+      update: {},
+      create: { userId },
+    });
+
+    const isFree = definition.priceMonthly === 0;
+    const status = isFree ? SubscriptionStatus.ACTIVE : SubscriptionStatus.TRIALING;
+    const data = { plan, status, seats: definition.seats };
+
+    const subscription = await this.prisma.subscription.upsert({
+      where: { lawyerId: lawyer.id },
+      create: { lawyerId: lawyer.id, ...data },
+      update: data,
+    });
+
+    let checkoutUrl: string | null = null;
+    if (!isFree && this.payments.provider !== 'none') {
+      try {
+        const checkout = await this.payments.createCheckout({
+          plan,
+          amount: definition.priceMonthly,
+          customerEmail: email,
+          metadata: { lawyerId: lawyer.id, plan },
+        });
+        checkoutUrl = checkout.url;
+      } catch (err) {
+        // The choice is already recorded; payment can be completed later from
+        // Settings rather than blocking the signup flow.
+        this.logger.warn(`Checkout unavailable during plan selection: ${(err as Error).message}`);
+      }
+    }
+
+    return { subscription: this.toSubscriptionView(subscription), checkoutUrl };
   }
 
   // -- Invoices -------------------------------------------------------------

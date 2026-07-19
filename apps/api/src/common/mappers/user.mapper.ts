@@ -12,6 +12,7 @@ export function toPublicUser(user: User, lawyer?: Lawyer | null): PublicUser {
     phone: user.phone,
     city: user.city,
     state: user.state,
+    emailVerified: user.emailVerified,
     onboardingComplete: user.onboardingComplete,
     lawyerId: lawyer?.id ?? null,
     createdAt: user.createdAt.toISOString(),
