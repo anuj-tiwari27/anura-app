@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { CourtType, Labels, PracticeArea, type PublicUser } from '@anura/shared';
@@ -23,6 +23,10 @@ export default function OnboardingPage() {
   const [state, setState] = useState('');
   const [areas, setAreas] = useState<PracticeArea[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  // Set while we navigate on to plan selection. Saving marks the user
+  // onboardingComplete, which would otherwise make the guard below fire and
+  // bounce them to /dashboard, skipping the plan step entirely.
+  const finishing = useRef(false);
 
   useEffect(() => {
     if (useAuth.getState().status === 'idle') void loadMe();
@@ -30,7 +34,9 @@ export default function OnboardingPage() {
 
   useEffect(() => {
     if (status === 'unauthenticated') router.replace('/login');
-    if (status === 'authenticated' && user?.onboardingComplete) router.replace('/dashboard');
+    if (!finishing.current && status === 'authenticated' && user?.onboardingComplete) {
+      router.replace('/dashboard');
+    }
     if (status === 'authenticated' && user && !fullName) setFullName(user.fullName ?? '');
   }, [status, user, router, fullName]);
 
@@ -63,10 +69,12 @@ export default function OnboardingPage() {
             practiceAreas: areas,
           };
       const updated = await api.post<PublicUser>('/users/onboarding', payload);
+      finishing.current = true;
       patchUser(updated);
-      toast.success('You are all set');
-      router.replace('/dashboard');
+      toast.success('Profile saved — last step');
+      router.replace('/plan');
     } catch (e) {
+      finishing.current = false;
       toast.error(e instanceof ApiError ? e.message : 'Could not save your details');
     } finally {
       setSubmitting(false);

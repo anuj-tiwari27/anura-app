@@ -56,7 +56,8 @@ export default function VerifySignupPage() {
       );
       setSession(res);
       toast.success('Email verified');
-      router.replace('/plan');
+      // Profile setup first, then plan selection (see /onboarding -> /plan).
+      router.replace('/onboarding');
     } catch (e) {
       toast.error(e instanceof ApiError ? e.message : 'Could not verify that code');
       setCode('');

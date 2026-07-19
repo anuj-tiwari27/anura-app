@@ -13,10 +13,11 @@ import { formatCurrency } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
 /**
- * Step 3 of signup: pick a plan before onboarding. Free activates immediately;
- * a paid plan is recorded and, when a payments provider is configured, sends
- * the user to checkout. Either way they continue to onboarding — billing can be
- * completed later from Settings, so this never blocks getting started.
+ * Final step of signup, after email verification and profile setup. Free
+ * activates immediately; a paid plan is recorded and, when a payments provider
+ * is configured, sends the user to checkout. Either way they land on the
+ * dashboard — billing can be completed later from Settings, so this never
+ * blocks getting started.
  */
 export default function ChoosePlanPage() {
   const router = useRouter();
@@ -46,7 +47,7 @@ export default function ChoosePlanPage() {
         return;
       }
       toast.success(`You're on the ${plan === 'FREE' ? 'Starter' : 'selected'} plan`);
-      router.replace('/onboarding');
+      router.replace('/dashboard');
     } catch (e) {
       toast.error(e instanceof ApiError ? e.message : 'Could not select that plan');
     } finally {
